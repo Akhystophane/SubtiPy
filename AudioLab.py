@@ -5,29 +5,18 @@ from elevenlabs import set_api_key, save
 from elevenlabs import voices, generate, play
 key = "22329c3dd35a33d7cd8997d7cdaabacf"
 set_api_key(key)
-import requests
+from mutagen.mp3 import MP3
+def check_mp3_size(chemin_fichier):
+  # Obtenir les métadonnées du fichier MP3
+  audio = MP3(chemin_fichier)
+  # Obtenir la durée en secondes
+  duree = audio.info.length
+  # Vérifier si la durée est inférieure à 60 secondes
+  if duree < 60:
+      print(f"Alerte : Le fichier MP3{chemin_fichier} fait moins de 60 secondes.")
+  else:
+    return True
 
-
-# CHUNK_SIZE = 1024
-# url = "https://api.elevenlabs.io/v1/text-to-speech/9VCnXyQHl9BYMLxIwxSxH"
-#
-# headers = {
-#   "Accept": "audio/mpeg",
-#   "Content-Type": "application/json",
-#   "xi-api-key": key
-# }
-#
-# data = {
-#   "text": "C'est un test",
-#   "model_id": "eleven_multilingual_v1",
-#   "voice_settings": {
-#     "stability": 0.56,
-#     "similarity_boost": 0.75
-#   }
-# }
-#
-# response = requests.post(url, json=data, headers=headers)
-# Chemin du dossier principal à parcourir
 dossier_principal = "/Users/emmanuellandau/Documents/EditLab/TODO"
 def make_voice(dossier_principal):
   # Parcours des sous-dossiers
@@ -48,6 +37,7 @@ def make_voice(dossier_principal):
         # Construction du chemin du fichier audio
         chemin_audio = os.path.join(dossier, "audio.mp3")
         save(audio, chemin_audio)
+        check_mp3_size(chemin_audio)
       else:
         print(dossier)
 
@@ -88,11 +78,12 @@ def dump_srt(folder):
   srt_path = os.path.join(folder, "audio.srt")
   audio_path = os.path.join(folder, "audio.mp3")
   if os.path.exists(srt_path):
+    print("there")
     return True
   # model = stable_whisper.load_faster_whisper('medium')
   # result = model.transcribe_stable(audio_path, language="fr")
   model = stable_whisper.load_model('medium')
-  result = model.transcribe(audio_path, fp16=False, language="french")
+  result = model.transcribe(audio_path, fp16=False, language="french", initial_prompt="signes astrologiques : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons")
   result = (
       result
       .split_by_length(max_words=2)
