@@ -5,10 +5,12 @@ from vaderSentiment_fr.vaderSentiment import SentimentIntensityAnalyzer
 import nltk
 import fr_core_news_md
 
+from suggesterLab.functions import update_json, get_srt_txt
+
+
 def words_highlight(folder):
-    text_path = os.path.join(folder, "description.txt")
-    with open(text_path, "r") as fichier:
-        text = fichier.read()
+    text_path = os.path.join(folder, "audio.srt")
+    text = get_srt_txt(text_path)
     chemin_fichier = folder + "edit_data.json"
     # if os.path.exists(chemin_fichier):
     #     print("pas de words_highlight edit_data existe")
@@ -39,24 +41,10 @@ def words_highlight(folder):
         if adj not in positif and adj not in negatif:
             neutre.append(adj.lower().replace(".", "").replace(",",""))
 
-    # with open(chemin_fichier, 'w') as fichier:
-    #     json.dump([positif, negatif, neutre], fichier)
-    # Lire le contenu existant
-    try:
-        with open(chemin_fichier, 'r') as fichier:
-            listes_existantes = json.load(fichier)
-    except FileNotFoundError:
-        listes_existantes = []
+    update_json(chemin_fichier, "Words", [positif, negatif, neutre])
 
-    # Ajouter video_manager comme troisième liste
-    listes_existantes.append([positif, negatif, neutre])
-
-    # Réécrire le fichier avec les listes mises à jour
-    with open(chemin_fichier, 'w') as fichier:
-        json.dump(listes_existantes, fichier)
-    print([positif, negatif, neutre])
-    print(text)
     return[positif, negatif, neutre]
+
 
 
 def word_color(highlight_l, word):

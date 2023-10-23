@@ -94,6 +94,9 @@ def create_folders_concept(dossier_parent, phrases):
         description_fichier = os.path.join(dossier, "description.txt")
         with open(description_fichier, "x") as file:
             pass
+        script_fichier = os.path.join(dossier, "script.txt")
+        with open(script_fichier, "x") as file:
+            pass
     return print("tâche effectuée")
 
 # copy_files("/Users/emmanuellandau/Documents/Astrologie/14_vidéos")
@@ -113,45 +116,34 @@ def lister_fichiers(dossier):
 #               "ESTP", "ESFP", "ENFP", "ENTP", "ESTJ", "ESFJ", "ENFJ", "ENTJ"]
 
 # questions = [f"La plus grande force des {mbti_type}s" for mbti_type in mbti_types]
-
 titres_videos = [
-    '10 choses à ne pas faire à un Bélier',
-    '10 choses que les Béliers adorent',
-    '10 choses que les Béliers détestent',
-    '10 choses à ne pas faire à un Taureau',
-    '10 choses que les Taureaux adorent',
-    '10 choses que les Taureaux détestent',
-    '10 choses à ne pas faire à un Gémeaux',
-    '10 choses que les Gémeaux adorent',
-    '10 choses que les Gémeaux détestent',
-    '10 choses à ne pas faire à un Cancer',
-    '10 choses que les Cancers adorent',
-    '10 choses que les Cancers détestent',
-    '10 choses à ne pas faire à un Lion',
-    '10 choses que les Lions adorent',
-    '10 choses que les Lions détestent',
-    '10 choses à ne pas faire à une Vierge',
-    '10 choses que les Vierges adorent',
-    '10 choses que les Vierges détestent',
-    '10 choses à ne pas faire à une Balance',
-    '10 choses que les Balances adorent',
-    '10 choses que les Balances détestent',
-    '10 choses à ne pas faire à un Scorpion',
-    '10 choses que les Scorpions adorent',
-    '10 choses que les Scorpions détestent',
-    '10 choses à ne pas faire à un Sagittaire',
-    '10 choses que les Sagittaires adorent',
-    '10 choses que les Sagittaires détestent',
-    '10 choses à ne pas faire à un Capricorne',
-    '10 choses que les Capricornes adorent',
-    '10 choses que les Capricornes détestent',
-    '10 choses à ne pas faire à un Verseau',
-    '10 choses que les Verseaux adorent',
-    '10 choses que les Verseaux détestent',
-    '10 choses à ne pas faire à un Poissons',
-    '10 choses que les Poissons adorent',
-    '10 choses que les Poissons détestent'
+    "8 choses à ne jamais dire à un Bélier",
+    "8 choses à ne jamais dire à un Taureau",
+    "8 choses à ne jamais dire à un Gémeaux",
+    "8 choses à ne jamais dire à un Cancer",
+    "8 choses à ne jamais dire à un Lion",
+    "8 choses à ne jamais dire à une Vierge",
+    "8 choses à ne jamais dire à une Balance",
+    "8 choses à ne jamais dire à un Scorpion",
+    "8 choses à ne jamais dire à un Sagittaire",
+    "8 choses à ne jamais dire à un Capricorne",
+    "8 choses à ne jamais dire à un Verseau",
+    "8 choses à ne jamais dire à un Poissons",
+    "Pourquoi tu ne devrais jamais contrarier un Bélier",
+    "Pourquoi tu ne devrais jamais contrarier un Taureau",
+    "Pourquoi tu ne devrais jamais contrarier un Gémeaux",
+    "Pourquoi tu ne devrais jamais contrarier un Cancer",
+    "Pourquoi tu ne devrais jamais contrarier un Lion",
+    "Pourquoi tu ne devrais jamais contrarier une Vierge",
+    "Pourquoi tu ne devrais jamais contrarier une Balance",
+    "Pourquoi tu ne devrais jamais contrarier un Scorpion",
+    "Pourquoi tu ne devrais jamais contrarier un Sagittaire",
+    "Pourquoi tu ne devrais jamais contrarier un Capricorne",
+    "Pourquoi tu ne devrais jamais contrarier un Verseau",
+    "Pourquoi tu ne devrais jamais contrarier un Poissons"
 ]
+
+
 
 
 

@@ -37,7 +37,7 @@ def find_subtxt(subs, word, previnPoint):
 
         if Levenshtein.distance(sub.text.lower(), word.lower()) <= 4 or word.lower() in sub.text.lower():
             # print("word: ", word, sub_txt, Levenshtein.distance(sub_txt, word), previnPoint + 0.01 < inPoint_temp, previnPoint, str(sub.start))
-            if previnPoint + 0.001 < inPoint_temp:
+            if previnPoint + 0.1 < inPoint_temp:
                 # print("word: ", word, sub.text.lower())
                 # print(previnPoint < inPoint_temp)
                 inPoint = sub.start
@@ -94,31 +94,122 @@ def dump_points(folder, niche):
             if not couple or not idx:
                 print(idx, couple)
         print(video_manager)
-        # print("------------------------------------------------------------------------------------------------------")
+        print("------------------------------------------------------------------------------------------------------")
+        return False
+    print(video_manager)
+    chemin_fichier = folder + "edit_data.json"
+    os.remove(chemin_fichier)
+    # Lire le contenu existant
+    try:
+        with open(chemin_fichier, 'r') as fichier:
+            listes_existantes = json.load(fichier)
+            if listes_existantes[0][0]:
+                if "Users" in listes_existantes[0][0]:
+                    listes_existantes[0] = video_manager
+                else:
+                    listes_existantes.insert(0, video_manager)
+
+        # Écrire les modifications
+        with open(chemin_fichier, 'w') as fichier:
+            json.dump(listes_existantes, fichier)
+    except FileNotFoundError:
+        listes_existantes = []
+        # Ajouter video_manager comme troisième liste
+        listes_existantes.append(video_manager)
+        # Réécrire le fichier avec les listes mises à jour
+        with open(chemin_fichier, 'w') as fichier:
+            json.dump(listes_existantes, fichier)
+    return True
+
+
+import re
+
+
+def find_words_and_list_in_string(s):
+    pattern = r'\[(.*?)\]'
+    matches = [(m.start(), m.group(1)) for m in re.finditer(pattern, s)]
+    results = []
+
+    start_idx = 0
+    for match_start, elements in matches:
+        # extract up to 3 words before the match
+        pre_match_str = s[start_idx:match_start].strip()
+        pre_match_words = pre_match_str.split()[-3:]  # Get the last 3 words
+
+        # Save the words and list
+        results.append((pre_match_words, list(map(int, elements.split(',')))))
+
+        start_idx = match_start  # update start_idx for the next iteration
+
+    return results
+def dump_points_v2(folder, niche):
+    subs = pysrt.open(folder + 'audio.srt', encoding='utf8')
+    with open(folder + 'script.txt', 'r', encoding='utf8') as txt_file:
+        txt_content = txt_file.read()
+
+    txt_l = txt_content.split()
+    video_manager = []
+    prev_inPoint = -0.01
+    for i in range(len(txt_l)):
+        if find_path(txt_l[i], niche):
+            path = find_path(txt_l[i], niche)
+        else:
+            path = txt_l[i]
+        if i==0 :
+            inPoint = 0.01
+
+
+            video_manager.append([path, '00,00'])
+        elif ".png" in txt_l[i] or ".mp4" in txt_l[i]:
+            print(txt_l[i])
+            if len(txt_l[i-1]) > 1:
+                prev_word = txt_l[i-1]
+            else:
+                prev_word = txt_l[i - 2]
+            # print(prev_word)
+            # print(inPoint)
+            inPoint = find_subtxt(subs, prev_word, prev_inPoint)
+            video_manager.append([path, time_to_seconds(str(inPoint))])
+            if inPoint:
+                prev_inPoint = float(time_to_seconds(str(inPoint)))
+            else:
+                # print(inPoint)
+                pass
+
+    video_manager.append(['last.mp4', time_to_seconds(str(subs[-1].end))])
+    has_none = any(None in sous_liste for sous_liste in video_manager)
+
+    if has_none:
+        print("-----------------------------------------None detected-------------------------------------------------")
+        for couple, idx in video_manager:
+            if not couple or not idx:
+                print(idx, couple)
+        print(video_manager)
+        print("------------------------------------------------------------------------------------------------------")
         return False
     print(video_manager)
     chemin_fichier = folder + "edit_data.json"
     # os.remove(chemin_fichier)
     # Lire le contenu existant
-    # try:
-    #     with open(chemin_fichier, 'r') as fichier:
-    #         listes_existantes = json.load(fichier)
-    #         if listes_existantes[0][0]:
-    #             if "Users" in listes_existantes[0][0]:
-    #                 listes_existantes[0] = video_manager
-    #             else:
-    #                 listes_existantes.insert(0, video_manager)
-    #
-    #     # Écrire les modifications
-    #     with open(chemin_fichier, 'w') as fichier:
-    #         json.dump(listes_existantes, fichier)
-    # except FileNotFoundError:
-    listes_existantes = []
-    # Ajouter video_manager comme troisième liste
-    listes_existantes.append(video_manager)
-    # Réécrire le fichier avec les listes mises à jour
-    with open(chemin_fichier, 'w') as fichier:
-        json.dump(listes_existantes, fichier)
+    try:
+        with open(chemin_fichier, 'r+') as fichier:
+            listes_existantes = json.load(fichier)
+            if listes_existantes[0][0]:
+                if "Users" in listes_existantes[0][0]:
+                    listes_existantes[0] = video_manager
+                else:
+                    listes_existantes.insert(0, video_manager)
+        # Écrire les modifications
+        with open(chemin_fichier, 'w') as fichier:
+            json.dump(listes_existantes, fichier)
+    except FileNotFoundError:
+        listes_existantes = []
+        # Ajouter video_manager comme troisième liste
+        listes_existantes.append(video_manager)
+        # Réécrire le fichier avec les listes mises à jour
+        with open(chemin_fichier, 'w') as fichier:
+            json.dump(listes_existantes, fichier)
     return True
 
-print(Levenshtein.distance("en commentaire.", "commentaire"))
+
+

@@ -1,3 +1,4 @@
+import json
 import os
 
 import pipeline as pipeline
@@ -77,13 +78,18 @@ def dump_srt(folder):
 
   srt_path = os.path.join(folder, "audio.srt")
   audio_path = os.path.join(folder, "audio.mp3")
+  txt_path = os.path.join(folder, "description.txt")
+  txt = """
+  Trois femmes sont mortes et se sont retrouvées devant les portes du paradis. Saint-Pierre a dit à la première femme : "Combien d'hommes as-tu fréquenté au cours de ta vie ?" La première femme a répondu : "Je n'ai dormi qu'avec un seul homme, mon mari, et je n'ai pas couché avec lui avant notre mariage." Saint-Pierre s'est tourné vers l'ange à côté de lui et a dit : "Donne-lui la clé de la chambre en argent." L'ange a donné à la femme une clé en argent et la femme est entrée au paradis avec la clé. Ensuite, Saint-Pierre a dit à la deuxième femme : "Combien d'hommes as-tu fréquenté au cours de ta vie ?" J'ai été vierge toute ma vie car j'étais une nonne et j'ai consacré ma vie à Dieu. Saint-Pierre s'est tourné vers l'ange et a dit : "Donne-lui la clé de la chambre en or." L'ange a donné à la femme une clé en or et la femme est entrée au paradis avec la clé. Enfin, Saint-Pierre a dit à la troisième femme : "Combien d'hommes as-tu fréquenté au cours de ta vie ?" J'ai couché avec 13 hommes avant de commencer à sortir avec mon mari, 35 hommes pendant que nous sortions ensemble, 49 hommes pendant que nous étions fiancés, 56 hommes pendant que nous étions mariés, et 28 hommes après sa mort. Saint-Pierre s'est tourné vers l'ange et a dit : "Donne-lui la clé de ma chambre."""
   if os.path.exists(srt_path):
     print("there")
     return True
-  # model = stable_whisper.load_faster_whisper('medium')
+  # model = stable_whisper.load_faster_whisper('medium', compute_type="float32")
   # result = model.transcribe_stable(audio_path, language="fr")
   model = stable_whisper.load_model('medium')
-  result = model.transcribe(audio_path, fp16=False, language="french", initial_prompt="signes astrologiques : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons")
+  # result = model.align(audio_path, txt)
+  # initial_prompt="signes astrologiques : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons"
+  result = model.transcribe(audio_path, fp16=False, language="french", prompt="signes astrologiques : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons")
   result = (
       result
       .split_by_length(max_words=2)
@@ -96,7 +102,23 @@ def dump_srt(folder):
   return True
 
 
-# folder = "/Users/emmanuellandau/Documents/EditLab/TODO/La plus grande force des ISTPs/"
-# dump_srt(folder)
+# folder = "/Users/emmanuellandau/Documents/EditLab/TODO/conseil"
+
 # transcribe_audio()
 # make_voice(dossier_principal)
+# dump_srt(folder)
+from moviepy.editor import *
+import whisper
+mp3_path = "/Users/emmanuellandau/Downloads/audio.mp3"
+text_path = "/Users/emmanuellandau/Downloads/srt_txt.mp3"
+# video = VideoFileClip("/Users/emmanuellandau/Downloads/Download (1).mp4")
+# audio = video.audio
+#
+# audio.write_audiofile(mp3_path)
+
+
+
+# model=stable_whisper.load_model('medium')
+# model.transcribe(mp3_path, fp16=False)
+# result = model.transcribe(mp3_path)
+# result.to_srt_vtt(text_path, segment_level=True, word_level=False)

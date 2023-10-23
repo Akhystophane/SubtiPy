@@ -1,94 +1,28 @@
 import ast
-import json
-import random
-import shutil
+import string
 import unicodedata
-
-import Levenshtein
+from Levenshtein import distance
+import json
+import shutil
+import re
 import openai
-
 from suggesterLab.Emojis import convert_emoji
-
-openai.api_key = "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"
-
-model_engine = "text-davinci-003"
-prompt = """"
-
-Je réalise des vidéos de manière automatisée à partir d'un script. j'ai besoin qu'à partir du texte de ma vidéo tu me
- suggères les endroits où je dois changer d'image de manière à réaliser le montage à posteriori. 
-    Ta réponse est envoyé directement a un programme informatique de montage  donc il est impératif que ta réponse ne comporte uniquement
-    le texte amendé (pas de texte parasite) avec les noms d'images ajoutés dans le texte avec un espace devant et derrière.
-  Tu devras ajouter le chemin de l'image ou de la vidéo où elle devra commencer à s'afficher. Tu auras à ta disposition
-   un set d'images qui contiennent dans leur nom des indications. en fonction de ces indications tu choisiras une photo
-    pertinente . Une image doit toujours être affichée, le texte débute avec une image. 
-    Je change d'image  toutes les phrases, ou également à certains temps fort comme à certaines virgules.
-      Le thème de la vidéo et du dataset est le MBTI, tu ne dois pas utiliser deux fois
-      la même image. Si pour certains noms d’image il y a un numéro c’est juste qu’il s’agit d’une image différente.
-
-
-Voici le texte de la vidéo:
-Es-tu un INFP ? Si c'est le cas, tu fais partie d'un groupe unique de rêveurs passionnés et créatifs ! Les INFP, souvent
- surnommés les "Médiateurs", possèdent une vision intérieure riche et sont guidés par un fort sens des valeurs. 
- Dotés d'une imagination débordante, ils voient la vie comme une grande tapestry, pleine de nuances et de possibilités.
-  Leur nature introvertie les rend parfois réservés, mais ne t'y trompe pas ! En eux brûle une flamme d'idéalisme et de passion,
-   cherchant constamment à exprimer leur essence et à contribuer au bien du monde. Empathiques et authentiques,
-    ils ont cette rare capacité d'établir des connexions profondes avec les personnes qu'ils rencontrent.
-     Attirés par l'art, la littérature et la philosophie, les INFP explorent sans cesse le vaste paysage de l'âme humaine.
-      Alors, te reconnais-tu dans cette description dynamique et inspirante ? Si en découvrir plus sur ta personnalité
-       t'intéresse, like et abonne-toi pour ne pas rater ma prochaine vidéo.
-
-Voici le set d’images:
-INFP_charismatic.png
-INFP_writing.png
-INFP_posing.png
-INFP_reading.png
-INFP_sad.png
-INFP_angry.png
-INFP_painting.png
-INFP_posing2.png
-INFP_thinking.png
-INFP_writing2.png
-INFP_happy.png
-INFP_sad2.png
-INFP_thinking2.png
-INFP_thoughtful.png
-INFP_evil.png
-INFJ_reading.png
-INFJ_teaching to a child.png
-INFJ_charismatic.png
-INFJ_intense eyes.png
-INFJ_writing.png
-INFJ_wise.png
-INFJ_helping.png
-INFJ_thinking.png
-"""
-
+from suggesterLab.functions import update_json, time_to_seconds, extract_dict
 import tiktoken
+openai.api_key = "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"
 
 def num_tokens_from_string(string: str, encoding_name: str) -> int:
     encoding = tiktoken.get_encoding(encoding_name)
     num_tokens = len(encoding.encode(string))
     return num_tokens
 
-# print(num_tokens_from_string(prompt, "cl100k_base"))
-
-# response = openai.ChatCompletion.create(
-#     model="gpt-4",
-#     messages=[
-#         {"role": "system", "content": "Tu es un programme informatique"},
-#         {"role": "user", "content": prompt}
-#     ]
-# )
-# print(response['choices'][0]['message']['content'])
 def emoji_suggester(folder):
     def save_png_emoji(emojis_l):
         for num_srt in emojis_l.keys():
             convert_emoji(emojis_l[num_srt], folder)
 
     niche = "astrologie"
-    i=0
     l_srt = []
-    text_only = ""
     sentence = {}
     flag = False
     with open(folder + "audio.srt", 'r', encoding='utf-8') as file:
@@ -108,49 +42,27 @@ def emoji_suggester(folder):
             if "." in text_only:
                 l_srt.append(sentence)
                 sentence = {}
-    chemin_fichier = folder + "edit_data.json"
-    # if os.path.exists(chemin_fichier):
-    #     print("pas de emoji_suggester edit_data existe")
-    #     return False
-    prompt2 = f"Je réalise en Python des sous-titres pour une vidéo sur l'{niche}. Voici une list qui contient des dicts de" \
-              f" phrases avec chaque srt :{l_srt}, tu dois" \
-              f"me renvoyer un dictionnaire avec comme clés: num du srt et valeur: un émoji pertinent (au format lisible Python comme : a\U0001F47D) qui pourrait être affiché." \
-              f"Par phrases quelques srt doivent avoir un émoji, environ 1/3 des srt (les autres srt ne sont pas dans le dict renvoyé) ta" \
-              f" réponse ne doit contenir que le dictionnaire, pas d'autre texte parasite qui fera crasher mon programme"
+
+    prompt2 = f"""Je réalise en Python des sous-titres pour une vidéo sur l'{niche}. Voici une liste qui contient des
+     dicts de phrases avec chaque srt :{l_srt}, tu dois me renvoyer un dictionnaire avec comme clés: num du srt et
+      valeur: un émoji pertinent (au format lisible Python comme : \U0001F47D) qui pourrait être affiché. 
+      Par phrases quelques srt doivent avoir un émoji, environ 1/3 des srt (les autres srt ne sont pas dans 
+      le dict renvoyé). Ta réponse ne doit contenir que le dictionnaire, pas d'autre texte parasite qui fera
+       crasher mon programme."""
+
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": "Tu es un programme informatique"},
+            {"role": "system", "content": "Tu es un assistant programmeur rigoureux"},
             {"role": "user", "content": prompt2}
         ]
     )
     print({response['choices'][0]['message']['content']})
-    emojis_l = ast.literal_eval(response['choices'][0]['message']['content'])
-
-    # Lire le contenu existant
-    try:
-        with open(chemin_fichier, 'r') as fichier:
-            listes_existantes = json.load(fichier)
-    except FileNotFoundError:
-        listes_existantes = []
-    # Ajouter video_manager comme troisième liste
-    listes_existantes.append(emojis_l)
-    # Réécrire le fichier avec les listes mises à jour
-    with open(chemin_fichier, 'w') as fichier:
-        json.dump(listes_existantes, fichier)
-
+    chemin_fichier = folder + "edit_data.json"
+    emojis_l = extract_dict(response['choices'][0]['message']['content'])
+    update_json(chemin_fichier, "Emojis", emojis_l)
     save_png_emoji(emojis_l)
     return emojis_l
-
-
-
-
-
-
-import os
-
-import os
-
 
 def lister_dossier(dossier):
     """
@@ -173,9 +85,6 @@ def lister_dossier(dossier):
             result[chemin_complet] = lister_dossier(chemin_complet)
 
     return result
-#-----------------------------------------------------------------------------------------------------------------------
-import os
-
 
 def lister_dossier_dans_dossier(dossier):
     fichiers = [f for f in os.listdir(dossier) if os.path.isdir(os.path.join(dossier, f))]
@@ -183,7 +92,6 @@ def lister_dossier_dans_dossier(dossier):
     for fichier in fichiers:
         l_dossier.append(fichier)
     return l_dossier
-
 
 def lister_fichiers_dans_dossier(dossier):
     """
@@ -220,12 +128,8 @@ def relevant_l(sign_names,niche):
             if sign_name in signe:
                 signe_l.append(signe)
     return signe_l
-
-import string
-import unicodedata
-from Levenshtein import distance
-
 def sont_similaires(s1, s2, levenshtein_tolerance=2):
+
     # Convertir en minuscules
     s1, s2 = s1.lower(), s2.lower()
 
@@ -242,9 +146,10 @@ def sont_similaires(s1, s2, levenshtein_tolerance=2):
     # Normaliser (supprimer les accents)
     s1 = unicodedata.normalize('NFD', s1).encode('ascii', 'ignore').decode("utf-8")
     s2 = unicodedata.normalize('NFD', s2).encode('ascii', 'ignore').decode("utf-8")
-
+    if levenshtein_tolerance == 3:
+        print(s1, s2, distance(s1, s2))
     # Comparer les chaînes nettoyées ou vérifier la distance de Levenshtein
-    if s1 == s2 or distance(s1, s2) <= levenshtein_tolerance:
+    if s1 == s2 or distance(s1, s2) <= levenshtein_tolerance or s1 in s2:
         return True
     return False
 
@@ -264,7 +169,7 @@ def get_relevant_signs(folder, signes):
             if sont_similaires(signe, mot):
                 relevant_signs.add(signe)  # Ajoutez le signe à l'ensemble s'il est similaire
 
-    return list(relevant_signs), contenu
+    return list(relevant_signs)
 
 def find_path(png_name, niche):
     """
@@ -282,6 +187,7 @@ def find_path(png_name, niche):
     for racine, _, fichiers in os.walk(main_folder):
         if png_name in fichiers:
             return os.path.join(racine, png_name)
+    print("pas de ", png_name)
     return None
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -319,103 +225,137 @@ def get_bibli(niche, num=False):
     # print("folders", niche, folders)
     return folders
 
-def do_script_file(folder, fichiers_supprimes, dico, niche):
-    def get_dico_astro():
-        sign_names, txt = get_relevant_signs(folder, signes_astrologiques) # à modifier
-        l_signes = relevant_l(sign_names, niche)
-        dico["signes"] = l_signes
-        dico_num = dico.copy()
-        for key in dico_num.keys():
-            if key != "signes":
-                dico_num[key] = len(dico_num[key])
-        return dico_num, txt
-    def get_dico_mbti():
-        print("ici")
-        sign_names, txt = get_relevant_signs(folder, mbti_types)  # à modifier
-        t = 0
-        dico_num = {}
-        for key, value in dico.items():
-            if key in sign_names:
-                t +=1
-                dico_num[key] = value
-        if t < 1:
-            print("Pas de personnalité touvé")
-            return False
-        return dico_num, txt
 
-    def make_bibli_relevant(fichiers_supprimes, dico):
-        script_text_l = script_text.split()
-        for idx, fichier in enumerate(script_text_l):
-            nom_sous_dossier = re.sub(r'\d+\.png$', '', fichier)
-            nom_sous_dossier = normaliser_cle(nom_sous_dossier)
-            if ".png" in fichier:
-                # print(dico)
-                # Utilisation d'une regex pour retirer les chiffres et l'extension ".png" à la fin
-                dico = {normaliser_cle(cle): valeur for cle, valeur in dico.items()}
+def formatter_srt(srt_text):
+    # Diviser le texte SRT en blocs
+    blocs = srt_text.strip().split('\n\n')
 
-                if nom_sous_dossier in dico and dico[nom_sous_dossier]:
-                    num = random.randint(0, len(dico[nom_sous_dossier]) - 1)
+    resultat = ""
+    for bloc in blocs:
+        # Séparer les lignes dans chaque bloc
+        lignes = bloc.split('\n')
 
-                    # Modification de l'élément directement dans script_text
-                    script_text_l[idx] = dico[nom_sous_dossier][num]
+        # Le premier élément est le numéro du sous-titre
+        numero = lignes[0].strip()
+
+        # Le reste est le texte du sous-titre
+        texte = ' '.join(lignes[2:])
+
+        # Ajouter au résultat avec le format souhaité
+        resultat += f"{{{numero}}} {texte} "
+
+    return resultat.strip()
 
 
-                    # Suppression du premier fichier du sous-dossier correspondant
+def remplacer_numeros_par_timestamps(dictionnaire, fichier_srt):
+    # Lire le fichier SRT et construire un dictionnaire de mapping numéro -> timestamp
+    mapping = {}
+    dernier_timestamp = None
+    with open(fichier_srt, 'r', encoding='utf-8') as file:
+        contenu = file.read().strip().split('\n\n')
+        for bloc in contenu:
+            lignes = bloc.split('\n')
+            numero = int(lignes[0].strip())
+            timestamp = lignes[1].split(' --> ')[0]
+            mapping[numero] = timestamp
+            dernier_timestamp = lignes[1].split(' --> ')[1]  # Mise à jour du dernier timestamp
 
-                    fichier_supprime = dico[nom_sous_dossier].pop(num)
+    # Remplacer les clés dans le dictionnaire original par les timestamps
+    nouveau_dictionnaire = {}
+    for numero, valeur in dictionnaire.items():
+        timestamp = mapping.get(int(numero))
+        if timestamp:
+            nouveau_dictionnaire[timestamp] = valeur
 
+    # Vérifier que le dictionnaire n'est pas trop petit
+    if len(nouveau_dictionnaire) <= 4:
+        raise Exception("Le dictionnaire est trop petit")
 
-                    # Ajout du fichier supprimé à la liste des fichiers supprimés pour le sous-dossier
-                    if nom_sous_dossier not in fichiers_supprimes:
-                        fichiers_supprimes[nom_sous_dossier] = []
+    # Ajouter le dernier timestamp avec la clé "last.mp4"
+    if dernier_timestamp:
+        nouveau_dictionnaire[dernier_timestamp] = "last.mp4"
 
-                    fichiers_supprimes[nom_sous_dossier].append(fichier_supprime)
+    return nouveau_dictionnaire
 
-                    # Si le nombre de fichiers est inférieur à 5, ajoutez tous les fichiers supprimés à la fin
-                    if len(dico[nom_sous_dossier]) < 5 and nom_sous_dossier in fichiers_supprimes:
-                        # print(
-                        #     "------------------------------------------------on a est goatesque on est les roi du monde---------------------")
-                        dico[nom_sous_dossier].extend(fichiers_supprimes[nom_sous_dossier])
-                        fichiers_supprimes[
-                            nom_sous_dossier] = []  # Vider la liste des fichiers supprimés pour le sous-dossier
-        return dico, fichiers_supprimes, ' '.join(script_text_l)
+def do_script_file(folder, fichiers_supprimes, niche):
+    def remplacer_par_fichier_aleatoire(bibli, fichiers_supprimes, script_text):
+        print("bibli", bibli)
+        fichiers_disponibles = None
+        for num_sous_titre, sous_dossier in script_text.items():
+            if sous_dossier == "last.mp4":
+                continue
+            # Liste des fichiers disponibles dans le sous-dossier
+            if ".png" in sous_dossier:
+                fichier_choisi = re.search(r'[^/\[\]]+\.png', sous_dossier).group()
+                script_text[num_sous_titre] = find_path(fichier_choisi, niche)
+                print(f"le chemin de {sous_dossier} est {find_path(fichier_choisi, niche)}")
 
-    dico = {normaliser_cle(cle): valeur for cle, valeur in dico.items()}
+            if not ".png" in sous_dossier:
+                fichiers_disponibles = [f for f in bibli[sous_dossier] if f not in fichiers_supprimes.get(sous_dossier, [])]
 
+            if fichiers_disponibles and not ".png" in sous_dossier:
+                # Choix aléatoire d'un fichier
+                fichier_choisi = random.choice(fichiers_disponibles)
+
+                # Mise à jour du script_text
+                script_text[num_sous_titre] = find_path(fichier_choisi, niche)
+
+                # Ajout du fichier aux fichiers supprimés pour éviter les duplicatas
+                if sous_dossier in fichiers_supprimes:
+                    fichiers_supprimes[sous_dossier].append(fichier_choisi)
+                else:
+                    fichiers_supprimes[sous_dossier] = [fichier_choisi]
+        return fichiers_supprimes, script_text
+
+    bibli = get_bibli(niche)
+    dico = bibli.copy()
+    for cle in fichiers_supprimes:
+        if cle in dico:
+            # Créer un nouvel ensemble pour dico2[cle] excluant les éléments de dico1[cle]
+            dico[cle] = [element for element in dico[cle] if element not in fichiers_supprimes[cle]]
+
+    elements_a_conserver = get_relevant_signs(folder, signes_astrologiques)
+
+    dico['signes'] = [element for element in dico['signes'] if
+                                  any(sont_similaires(sub, element, levenshtein_tolerance=0) for sub in elements_a_conserver)]
     if niche == "astrologenial":
-        dico_num, txt = get_dico_astro()
-    elif niche == "mbti":
-        dico_num, txt = get_dico_mbti()
-    else:
-        dico_num, txt = None, None
-    print(dico_num)
-    prompt = get_char(niche, "prompt")
-    prompt = prompt.replace("{dico_num}", str(dico_num))
+        for cle, valeur in dico.items():
+            if cle != 'signes' and isinstance(valeur, list):
+                dico[cle] = len(valeur)
+        with open(folder + "audio.srt", 'r', encoding='utf-8') as file:
+            txt = formatter_srt(file.read())
+    # elif niche == "mbti":
+    #     dico, txt = get_dico_mbti()
+    # else:
+    #     dico, txt = None, None
+    # print(dico_num)
+    prompt = get_char(niche, "prompt_test")
+    prompt = prompt.replace("{dico_num}", str(dico))
     prompt = prompt.replace("{txt}", str(txt))
 
     print(prompt)
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": "Tu es un programme informatique"},
+            {"role": "system", "content": "Tu es un assistant"},
             {"role": "user", "content": prompt}
         ]
     )
+    print(response['choices'][0]['message']['content'])
 
     script_text = response['choices'][0]['message']['content']
-    # script_text = """personne_mystère_peur3.png Quel est le signe astrologique qui se donne trop de mal ? Prends une minute, et tente de deviner. Écris ton pronostic dans les commentaires avant de poursuivre. personne_mystère_peur89.png Es-tu prêt ? Celui dont nous parlons est connu pour son dévouement inébranlable, pour cette ardente passion qui l'anime à tout moment. Dans chaque projet, dans chaque relation, il met tout son cœur, souvent au détriment de lui-même. emma_lnd_divine_realistic_angel_sharp_color_95ad4ad3-f139-4a93-a35a-b25f2cb53869.png Ce signe a tendance à oublier ses propres besoins, se perdant dans le désir de satisfaire les autres. Son altruisme est remarquable, mais parfois, il peut aller trop loin, risquant ainsi l'épuisement ou la déception. Son énergie débordante le pousse souvent à en faire plus que nécessaire. Pour lui, l'abandon n'est pas une option. emma_lnd_Very_dangerous_and_thretening_person_with_no_face_vfx_a474331f-cc44-4bbb-a19c-8db138ac64a7.png Dans le zodiaque, il est représenté par un animal qui ne recule devant aucun obstacle, qui gravit montagne après montagne avec une détermination sans faille. Alors, as-tu deviné de quel signe il s'agit ? Capricorne_wise.png C'est bien sûr le Capricorne ! Si l'astrologie t'intéresse, like et abonne-toi pour ne pas rater ma prochaine vidéo.
-    # """
-    script_text = ' '.join(mot.strip() for mot in script_text.split())
-    dico, fichiers_supprimes, script_text = make_bibli_relevant(fichiers_supprimes, dico)
+    #ligne pour tester sans utiliser les credits du LLM
+    # script_text = "{0: 'signes/Poisson_evil.png', 5: 'personne_mystère_peur', 15: 'signes/Poisson.png', 18: 'personne_mystère_positive', 29: 'signes/Poisson_smiling.png', 40: 'personne_angélique', 50: 'signes/Poisson_apeuré.png', 61: 'couples_de_signes', 72: 'signes/Cancer_dark.png', 81: 'personne_démoniaque'}"
+    start = script_text.find("{")
+    end = script_text.rfind("}") + 1
+    script_text = ast.literal_eval(script_text[start:end])
+    script_text = remplacer_numeros_par_timestamps(script_text, folder + "audio.srt")
+    fichiers_supprimes, script_text = remplacer_par_fichier_aleatoire(bibli, fichiers_supprimes, script_text)
+    timestamps_l = [[valeur, time_to_seconds(cle)] for cle, valeur in script_text.items()]
+    chemin_fichier = folder + "edit_data.json"
+    update_json(chemin_fichier, "Timestamps", timestamps_l)
 
-    chemin = folder + "script.txt"
-    print(script_text)
-
-    # Utilisez le mode 'w' pour écrire
-    with open(chemin, 'w') as fichier:
-        fichier.write(script_text)
-
-    return dico, fichiers_supprimes
+    return fichiers_supprimes
 
 def normaliser_cle(cle):
     return unicodedata.normalize('NFC', cle)
@@ -449,8 +389,6 @@ base_folder = 'chemin_du_dossier_principal'
 var = 1
 print(get_random_file_path(base_folder, var))
 
-
-import re
 def music_suggester(folder):
     titre = os.path.basename(os.path.normpath(folder))
     prompt = f""""
@@ -462,7 +400,7 @@ def music_suggester(folder):
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": "Tu es un programme informatique"},
+            {"role": "system", "content": "Tu es un assistant consciencieux"},
             {"role": "user", "content": prompt}
         ]
     )
@@ -478,25 +416,9 @@ def music_suggester(folder):
     shutil.copy(path_music, folder)
     return True
 
-
-
-
-
-
-
-
-
-# folder = "/Users/emmanuellandau/Documents/EditLab/TODO/Le signe le plus généreux/"
-# sign_names, txt = get_relevant_signs(folder, signes_astrologiques)
-# dico = relevant_l(bibli, sign_names)
-
-#
-# fichiers_supprimes = {}
-# fichiers_a_sup = ['personne_mystère_peur42.png', 'personne_angélique8.png', 'Cancer_beautiful.png']
-import os
 def get_char(niche, char):
     # Lire à partir d'un fichier JSON
-    with open('suggesterLab/niche_settings.json', 'r') as f:
+    with open('/Users/emmanuellandau/PycharmProjects/SubtiPy/suggesterLab/niche_settings.json', 'r') as f:
         data = json.load(f)
     # Récupérer et convertir la chaîne en multilignes
     texte = data[niche][char].replace("\\n", "\n")
@@ -518,93 +440,23 @@ def renommer_fichiers(dossier_principal):
                 os.rename(chemin_original, chemin_nouveau)
                 print(f"'{chemin_original}' a été renommé en '{chemin_nouveau}'")
 
-def check_json(folder):
-    json_path = os.path.join(folder, "edit_data.json")
-    # Charger le fichier JSON
-    with open(json_path, 'r') as f:
-        data = json.load(f)
-
-    # Vérifier si le fichier contient trois éléments et pas quatre
-    if len(data) == 3:
-        print("Le fichier contient exactement trois éléments.")
-    elif len(data) == 4:
-        print("--------------------------------------------------Le fichier contient quatre éléments.")
-    else:
-        print(f"-------------------------------------------------Le fichier contient {len(data)} éléments.")
-
-# Exemple d'utilisation
-# dossier_principal = "/Users/emmanuellandau/Documents/MBTI_bibliothèque 2"
-# renommer_fichiers(dossier_principal)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def save_settings():
     text_astro = f""""
-    
-    Je réalise des vidéos de manière automatisée à partir d'un script. j'ai besoin qu'à partir du texte de ma vidéo tu me
-     suggères les endroits où je dois changer d'image de manière à réaliser le montage à posteriori. 
-        Ta réponse est envoyé directement a un programme informatique de montage  donc il est impératif que ta réponse ne comporte uniquement
-        le texte amendé (pas de texte parasite) avec les noms d'images ajoutés dans le texte comme un mot sans quote.
-      Tu devras ajouter le nom de l'image ou de la vidéo où elle devra commencer à s'afficher. Tu auras à ta disposition
-       un set d'images qui contiennent dans leur nom des indications. en fonction de ces indications tu choisiras une photo
-        pertinente . Une image doit toujours être affichée, ton texte COMMENCE donc avec une image! et se termine avec une phrase.
-        Je change d'image toutes les phrases ou rarement après un temps fort comme une virgule. Je veux entre 7 et 9 images.
-          Le thème de la vidéo et du dataset est l'astrologie, tu ne dois pas utiliser deux fois
-          la même image. Si la valeur de la clé est un chiffre n, tu as n images différentes avec le même effet, tu peux 
-          insérer ange4.png et ange8.png par exemple. 
-    
-    
-    Voici le texte de la vidéo:{{txt}}
-    
-    Voici le set d’images: {{dico_num}}
-    Il est impératif que le nom de l'image soit comme dans le set ou dans le format spécifié en amont car c'est envoyé a un algo.
-    Si c'est une vidéo mystère privilégie les images qui ne réfèrent pas à un signe en particulier jusqu'au moment où son identité et dévoilé
-    
-    """
-
-    prompt_mbti = f""""
-    
-    Je réalise des vidéos de manière automatisée à partir d'un script. j'ai besoin qu'à partir du texte de ma vidéo tu me
-     suggères les endroits où je dois changer d'image de manière à réaliser le montage à posteriori. 
-        Ta réponse est envoyé directement a un programme informatique de montage  donc il est impératif que ta réponse ne comporte uniquement
-        le texte amendé (pas de texte parasite) avec les noms d'images ajoutés dans le texte comme un mot sans quote.
-      Tu devras ajouter le nom de l'image ou de la vidéo où elle devra commencer à s'afficher. Tu auras à ta disposition
-       un set d'images qui contiennent dans leur nom des indications. en fonction de ces indications tu choisiras une photo
-        pertinente . Une image doit toujours être affichée, ton texte COMMENCE donc avec une image! et se termine avec une phrase.
-        Je change d'image toutes les phrases ou rarement après un temps fort comme une virgule. Je veux entre 7 et 9 images.
-          Le thème de la vidéo et du dataset est le MBTI, tu ne dois pas utiliser deux fois
-          la même image.
-    
-    
-    Voici le texte de la vidéo:{{txt}}
-    
-    Voici le set d’images: {{dico_num}}
-    Il est impératif que le nom de l'image soit exactement comme dans le set ou dans le format spécifié en amont car c'est envoyé a un algo.
-    Si c'est une vidéo mystère privilégie les images qui ne réfèrent pas à un signe en particulier jusqu'au moment où son identité et dévoilé
+        Je réalise des vidéos de manière automatisée à partir d'un script. J'ai besoin que, à partir du texte de ma
+         vidéo, tu me suggères les endroits où je dois changer d'image pour réaliser le montage à posteriori
+          au format d'un dictionnaire  de 10 clés maximum qui a comme clé le numéro du sous titre et comme 
+          valeur le nom de l'image ou du dossier, le  sous-titre 0 a necessairement une image, les nuumeros
+           que tu choisiras par le suite seront ceux des debuts de phrases, ou mdu moins pas trop rapproche.
+            Mon texte est composé du script de ma video avec le numéro des sous-titres entre accolades.
+             Ta réponse ne doit contenir que le dictionnaire qui est envoyée directement à un programme informatique
+              de montage, donc il est impératif que ta réponse soi un dictionnaire. Tu auras à ta disposition un set
+               de noms de sous dossiers et d'images qui contiennent dans leur nom des indications. En fonction de ces
+                indications, tu choisiras une photo ou un sous-dossier pertinent. Je change d'image à chaque phrase ou
+                 rarement après un temps fort comme une virgule. Je veux entre 7 et 9 images. Le thème de la vidéo et
+                  du dataset est l'astrologie, tu peux utiliser plusieur fois le meme nom de dossier mais tu ne dois pas 
+                  utiliser deux fois la même image.
+        Texte vidéo = {{txt}}
+        Dataset = {{dico_num}}
     
     """
 
@@ -613,23 +465,23 @@ def save_settings():
 
     # Créer un dictionnaire pour stocker vos données
     data = {
-        "astrologenial":
-                {'prompt': texte_single_line}
-         ,
-            "mbti":
-                {'prompt': prompt_mbti.replace("\n", "\\n")}
-
+    "astrologenial": {
+        "prompt": "\"\\n\\nJe r\u00e9alise des vid\u00e9os de mani\u00e8re automatis\u00e9e \u00e0 partir d'un script. j'ai besoin qu'\u00e0 partir du texte de ma vid\u00e9o tu me\\n sugg\u00e8res les endroits o\u00f9 je dois changer d'image de mani\u00e8re \u00e0 r\u00e9aliser le montage \u00e0 posteriori. \\n    Ta r\u00e9ponse est envoy\u00e9 directement a un programme informatique de montage  donc il est imp\u00e9ratif que ta r\u00e9ponse ne comporte uniquement\\n    le texte amend\u00e9 (pas de texte parasite) avec les noms d'images ajout\u00e9s dans le texte comme un mot sans quote.\\n  Tu devras ajouter le nom de l'image ou de la vid\u00e9o o\u00f9 elle devra commencer \u00e0 s'afficher. Tu auras \u00e0 ta disposition\\n   un set d'images qui contiennent dans leur nom des indications. en fonction de ces indications tu choisiras une photo\\n    pertinente . Une image doit toujours \u00eatre affich\u00e9e, ton texte COMMENCE donc avec une image! et se termine avec une phrase.\\n    Je change d'image toutes les phrases ou rarement apr\u00e8s un temps fort comme une virgule. Je veux entre 7 et 9 images.\\n      Le th\u00e8me de la vid\u00e9o et du dataset est l'astrologie, tu ne dois pas utiliser deux fois\\n      la m\u00eame image. Si la valeur de la cl\u00e9 est un chiffre n, tu as n images diff\u00e9rentes avec le m\u00eame effet, tu peux \\n      ins\u00e9rer ange4.png et ange8.png par exemple. \\n\\n\\nVoici le texte de la vid\u00e9o:{txt}\\n\\nVoici le set d\u2019images: {dico_num}\\nIl est imp\u00e9ratif que le nom de l'image soit comme dans le set ou dans le format sp\u00e9cifi\u00e9 en amont car c'est envoy\u00e9 a un algo.\\nSi c'est une vid\u00e9o myst\u00e8re privil\u00e9gie les images qui ne r\u00e9f\u00e8rent pas \u00e0 un signe en particulier jusqu'au moment o\u00f9 son identit\u00e9 et d\u00e9voil\u00e9\\n\\n",
+        "prompt_test": texte_single_line,
+        "bibli": "/Users/emmanuellandau/Documents/Astrologie/bibliothèque"
+    },
+    "mbti": {
+        "prompt": "\"\\n\\nJe r\u00e9alise des vid\u00e9os de mani\u00e8re automatis\u00e9e \u00e0 partir d'un script. j'ai besoin qu'\u00e0 partir du texte de ma vid\u00e9o tu me\\n sugg\u00e8res les endroits o\u00f9 je dois changer d'image de mani\u00e8re \u00e0 r\u00e9aliser le montage \u00e0 posteriori. \\n    Ta r\u00e9ponse est envoy\u00e9 directement a un programme informatique de montage  donc il est imp\u00e9ratif que ta r\u00e9ponse ne comporte uniquement\\n    le texte amend\u00e9 (pas de texte parasite) avec les noms d'images ajout\u00e9s dans le texte comme un mot sans quote.\\n  Tu devras ajouter le nom de l'image ou de la vid\u00e9o o\u00f9 elle devra commencer \u00e0 s'afficher. Tu auras \u00e0 ta disposition\\n   un set d'images qui contiennent dans leur nom des indications. en fonction de ces indications tu choisiras une photo\\n    pertinente . Une image doit toujours \u00eatre affich\u00e9e, ton texte COMMENCE donc avec une image! et se termine avec une phrase.\\n    Je change d'image toutes les phrases ou rarement apr\u00e8s un temps fort comme une virgule. Je veux entre 7 et 9 images.\\n      Le th\u00e8me de la vid\u00e9o et du dataset est le MBTI, tu ne dois pas utiliser deux fois\\n      la m\u00eame image.\\n\\n\\nVoici le texte de la vid\u00e9o:{txt}\\n\\nVoici le set d\u2019images: {dico_num}\\nIl est imp\u00e9ratif que le nom de l'image soit exactement comme dans le set ou dans le format sp\u00e9cifi\u00e9 en amont car c'est envoy\u00e9 a un algo.\\nSi c'est une vid\u00e9o myst\u00e8re privil\u00e9gie les images qui ne r\u00e9f\u00e8rent pas \u00e0 un signe en particulier jusqu'au moment o\u00f9 son identit\u00e9 et d\u00e9voil\u00e9\\n\\n",
+        "bibli" : "/Users/emmanuellandau/Documents/MBTI_bibliothèque 2"
     }
-
+    }
 
     # Écrire dans un fichier JSON
     with open('niche_settings.json', 'w') as f:
         json.dump(data, f, indent=4)
 
 
-
-
-
+# save_settings()
 
 
 
