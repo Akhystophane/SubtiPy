@@ -1,6 +1,5 @@
 import json
 import os
-from pathlib import Path
 import openai
 from base64 import b64decode
 # create.py
@@ -8,7 +7,7 @@ from base64 import b64decode
 def generate_img(prompt):
     PROMPT = prompt
     DATA_DIR = "/Users/emmanuellandau/Documents/generated_images"
-    openai.api_key = "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"
+    openai.api_key = os.environ["OPENAI_API_KEY"]
 
     response = openai.Image.create(
         prompt=PROMPT,

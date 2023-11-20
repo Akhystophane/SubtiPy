@@ -5,7 +5,7 @@ import openai
 from mediaLab.ImageSuggester import generate_img
 from mediaLab.main import download_video
 
-openai.api_key = "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"
+openai.api_key = os.environ["OPENAI_API_KEY"]
 
 def find_video_path(keywords, folder, id_l):
     path = download_video(keywords, folder, id_l)

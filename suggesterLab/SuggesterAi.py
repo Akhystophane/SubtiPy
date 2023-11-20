@@ -9,8 +9,9 @@ import openai
 from suggesterLab.Emojis import convert_emoji
 from suggesterLab.functions import update_json, time_to_seconds, extract_dict
 import tiktoken
-openai.api_key = "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"
+import os
 
+openai.api_key = os.environ["OPENAI_API_KEY"]
 def num_tokens_from_string(string: str, encoding_name: str) -> int:
     encoding = tiktoken.get_encoding(encoding_name)
     num_tokens = len(encoding.encode(string))
