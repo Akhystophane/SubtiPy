@@ -116,32 +116,51 @@ def lister_fichiers(dossier):
 #               "ESTP", "ESFP", "ENFP", "ENTP", "ESTJ", "ESFJ", "ENFJ", "ENTJ"]
 
 # questions = [f"La plus grande force des {mbti_type}s" for mbti_type in mbti_types]
+
 titres_videos = [
-    "8 choses à ne jamais dire à un Bélier",
-    "8 choses à ne jamais dire à un Taureau",
-    "8 choses à ne jamais dire à un Gémeaux",
-    "8 choses à ne jamais dire à un Cancer",
-    "8 choses à ne jamais dire à un Lion",
-    "8 choses à ne jamais dire à une Vierge",
-    "8 choses à ne jamais dire à une Balance",
-    "8 choses à ne jamais dire à un Scorpion",
-    "8 choses à ne jamais dire à un Sagittaire",
-    "8 choses à ne jamais dire à un Capricorne",
-    "8 choses à ne jamais dire à un Verseau",
-    "8 choses à ne jamais dire à un Poissons",
-    "Pourquoi tu ne devrais jamais contrarier un Bélier",
-    "Pourquoi tu ne devrais jamais contrarier un Taureau",
-    "Pourquoi tu ne devrais jamais contrarier un Gémeaux",
-    "Pourquoi tu ne devrais jamais contrarier un Cancer",
-    "Pourquoi tu ne devrais jamais contrarier un Lion",
-    "Pourquoi tu ne devrais jamais contrarier une Vierge",
-    "Pourquoi tu ne devrais jamais contrarier une Balance",
-    "Pourquoi tu ne devrais jamais contrarier un Scorpion",
-    "Pourquoi tu ne devrais jamais contrarier un Sagittaire",
-    "Pourquoi tu ne devrais jamais contrarier un Capricorne",
-    "Pourquoi tu ne devrais jamais contrarier un Verseau",
-    "Pourquoi tu ne devrais jamais contrarier un Poissons"
+    "Les 8 secrets des Béliers",
+    "Les 8 secrets des Taureaux",
+    "Les 8 secrets des Gémeaux",
+    "Les 8 secrets des Cancers",
+    "Les 8 secrets des Lions",
+    "Les 8 secrets des Vierges",
+    "Les 8 secrets des Balances",
+    "Les 8 secrets des Scorpions",
+    "Les 8 secrets des Sagittaires",
+    "Les 8 secrets des Capricornes",
+    "Les 8 secrets des Verseaux",
+    "Les 8 secrets des Poissons",
+    "Pourquoi énerver un Bélier est suicidaire",
+    "Pourquoi énerver un Taureau est suicidaire",
+    "Pourquoi énerver un Gémeaux est suicidaire",
+    "Pourquoi énerver un Cancer est suicidaire",
+    "Pourquoi énerver un Lion est suicidaire",
+    "Pourquoi énerver une Vierge est suicidaire",
+    "Pourquoi énerver une Balance est suicidaire",
+    "Pourquoi énerver un Scorpion est suicidaire",
+    "Pourquoi énerver un Sagittaire est suicidaire",
+    "Pourquoi énerver un Capricorne est suicidaire",
+    "Pourquoi énerver un Verseau est suicidaire",
+    "Pourquoi énerver un Poissons est suicidaire",
+    "Si tu es Bélier et tu vois cette vidéo avant le dix-sept janvier",
+    "Si tu es Taureau et tu vois cette vidéo avant le dix-sept janvier",
+    "Si tu es Gémeaux et tu vois cette vidéo avant le dix-sept janvier",
+    "Si tu es Cancer et tu vois cette vidéo avant le dix-sept janvier",
+    "Si tu es Lion et tu vois cette vidéo avant le dix-sept janvier",
+    "Si tu es Vierge et tu vois cette vidéo avant le dix-sept janvier",
+    "Si tu es Balance et tu vois cette vidéo avant le dix-sept janvier",
+    "Si tu es Scorpion et tu vois cette vidéo avant le dix-sept janvier",
+    "Si tu es Sagittaire et tu vois cette vidéo avant le dix-sept janvier",
+    "Si tu es Capricorne et tu vois cette vidéo avant le dix-sept janvier",
+    "Si tu es Verseau et tu vois cette vidéo avant le dix-sept janvier",
+    "Si tu es Poissons et tu vois cette vidéo avant le dix-sept janvier"
 ]
+
+
+
+
+
+
 
 
 

@@ -25,16 +25,14 @@ def replace_keywords_with_video_path(match, folder, id_l):
     parsed_elements = []
     for element in elements:
         element = element.strip()
+        try:
+            parsed_elements.append(int(element))
+        except ValueError:
+            parsed_elements.append(element)
+    video_path, id_l = find_video_path(parsed_elements, folder, id_l)
+    if not video_path:
         print("on va généééééérerrrrr sur DALEEEEEE")
-        video_path = generate_img(element)
-    #     try:
-    #         parsed_elements.append(int(element))
-    #     except ValueError:
-    #         parsed_elements.append(element)
-    # video_path, id_l = find_video_path(parsed_elements, folder, id_l)
-    # if not video_path:
-    #     print("on va généééééérerrrrr sur DALEEEEEE")
-    #     video_path = generate_img(parsed_elements[0])
+        video_path = generate_img(parsed_elements[0])
     cleaned_video_path = clean_video_path(video_path)
     return cleaned_video_path, id_l
 
@@ -107,6 +105,8 @@ def script_stroke(folder, downloaded_ids):
         nonlocal updated_downloaded_ids
         cleaned_video_path, updated_downloaded_ids = replace_keywords_with_video_path(match, folder, updated_downloaded_ids)
         return cleaned_video_path
+
+
 
     script_text = re.sub(r'\[(.*?)\]', replace_function, text)
     with open(chemin_script, 'w', encoding='utf-8') as fichier:

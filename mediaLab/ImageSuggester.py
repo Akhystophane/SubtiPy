@@ -2,7 +2,6 @@ import json
 import os
 import openai
 from base64 import b64decode
-# create.py
 
 def generate_img(prompt):
     PROMPT = prompt

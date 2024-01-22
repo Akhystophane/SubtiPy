@@ -26,6 +26,34 @@ def update_json(nom_fichier, cle, valeur):
             # Créer un dictionnaire avec la clé et la valeur fournies et écrire dans le fichier
             data = {cle: valeur}
             json.dump(data, fichier)
+def get_char(niche, char):
+    # Lire à partir d'un fichier JSON
+    with open('/Users/emmanuellandau/PycharmProjects/SubtiPy/suggesterLab/niche_settings.json', 'r') as f:
+        data = json.load(f)
+    # Récupérer et convertir la chaîne en multilignes
+    texte = data[niche][char].replace("\\n", "\n")
+
+    return texte
+
+def formatter_srt(srt_text):
+    # Diviser le texte SRT en blocs
+    blocs = srt_text.strip().split('\n\n')
+
+    resultat = ""
+    for bloc in blocs:
+        # Séparer les lignes dans chaque bloc
+        lignes = bloc.split('\n')
+
+        # Le premier élément est le numéro du sous-titre
+        numero = lignes[0].strip()
+
+        # Le reste est le texte du sous-titre
+        texte = ' '.join(lignes[2:])
+
+        # Ajouter au résultat avec le format souhaité
+        resultat += f"{{{numero}}} {texte} "
+
+    return resultat.strip()
 
 def time_to_seconds(time_str):
     try:

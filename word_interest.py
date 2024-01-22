@@ -1,6 +1,6 @@
 import json
 import os
-
+import spacy
 from vaderSentiment_fr.vaderSentiment import SentimentIntensityAnalyzer
 import nltk
 import fr_core_news_md

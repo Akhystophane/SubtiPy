@@ -3,7 +3,8 @@ import os
 import shutil
 import subprocess
 from AudioLab import dump_srt
-from suggesterLab.SuggesterAi import emoji_suggester, do_script_file, music_suggester
+from accounts.RedditStories.R_functions import do_script_file
+from suggesterLab.SuggesterAi import emoji_suggester, music_suggester
 from suggesterLab.footageSuggester import create_dict3, get_footage_dict
 from suggesterLab.functions import key_exists_in_json, update_json, time_to_seconds
 from word_interest import words_highlight
@@ -11,7 +12,6 @@ from word_interest import words_highlight
 
 def ae_script():
     # Commande à exécuter
-    command = '''osascript -e "tell application \\"Adobe After Effects 2023\\" to activate" -e "tell application \\"Adobe After Effects 2023\\" to DoScriptFile \\"/Users/emmanuellandau/Scripts_Adobe/aE-test.jsx\\""'''
     command = '''osascript -e "with timeout of 300 seconds" -e "tell application \\"Adobe After Effects 2023\\" to activate" -e "tell application \\"Adobe After Effects 2023\\" to DoScriptFile \\"/Users/emmanuellandau/Scripts_Adobe/aE-test.jsx\\"" -e "end timeout"'''
 
     # Exécuter la commande et récupérer la sortie
@@ -58,15 +58,15 @@ def get_ready(Lab_path, niche, check_condition=False, break_after_first=False):
             folder = chemin
             folder = folder + "/"
             dump_srt(folder)
-            fichiers_supprimes = do_script_file(folder, fichiers_supprimes, niche)
+            # fichiers_supprimes = do_script_file(folder, fichiers_supprimes, niche)
 
 
 
             if check_condition:
                 if not key_exists_in_json(os.path.join(folder, "edit_data.json"), "Words"):
                     words_highlight(folder)
-                    emoji_suggester(folder)
-                    music_suggester(folder)
+                    # emoji_suggester(folder)
+                    # music_suggester(folder)
                 else:
                     print("deja fait")
             else:
@@ -116,8 +116,9 @@ def get_done(Lab_path):
             shutil.move(fold, destination_folder)
     return True
 
-get_ready("/Users/emmanuellandau/Documents/EditLab", "astrologenial")
-# get_done("/Users/emmanuellandau/Documents/EditLab")
+# get_ready("/Users/emmanuellandau/Documents/EditLab", "reddit_stories")
+
+get_done("/Users/emmanuellandau/Documents/EditLab")
 
 
 

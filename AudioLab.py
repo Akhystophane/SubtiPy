@@ -90,6 +90,7 @@ def dump_srt(folder):
   # result = model.align(audio_path, txt)
   # initial_prompt="signes astrologiques : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons"
   result = model.transcribe(audio_path, fp16=False, language="french", prompt="signes astrologiques : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons")
+  print(result)
   result = (
       result
       .split_by_length(max_words=2)
@@ -97,7 +98,6 @@ def dump_srt(folder):
       .merge_by_punctuation(["'","-"])
       # .split_by_length(max_words=3)
   )
-
   result.to_srt_vtt(srt_path, segment_level=True, word_level=False)
   return True
 
@@ -106,7 +106,7 @@ def dump_srt(folder):
 
 # transcribe_audio()
 # make_voice(dossier_principal)
-# dump_srt(folder)
+# dump_                                                                                                                                                                                                                                       srt(folder)
 from moviepy.editor import *
 import whisper
 mp3_path = "/Users/emmanuellandau/Downloads/audio.mp3"
@@ -122,3 +122,4 @@ text_path = "/Users/emmanuellandau/Downloads/srt_txt.mp3"
 # model.transcribe(mp3_path, fp16=False)
 # result = model.transcribe(mp3_path)
 # result.to_srt_vtt(text_path, segment_level=True, word_level=False)
+# dump_srt("/Users/emmanuellandau/Documents/EditLab/TODO/test")

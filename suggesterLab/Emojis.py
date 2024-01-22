@@ -1,6 +1,7 @@
 import os
 
 from PIL import Image, ImageDraw, ImageFont
+
 def find_path(png_name):
     """
     Trouve le chemin d'un png depuis un dictionnaire jusqu'à un dossier principal.

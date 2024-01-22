@@ -38,27 +38,35 @@ def write_file(filename, content):
         f.write(content + '\n')
 
 
-def download_video(type_of_videos, folder, id_l, vertical=True):
+def download_video(type_of_videos, id_l, vertical=True, duration=0.0, pic=False):
     bibli_path = "/Users/emmanuellandau/Documents/mediaLibrary"
     tags = type_of_videos
-
     api = Pexels(API_KEY)
     num_page = 1
 
     for tag in tags:
 
         output = api.search_videos(query=tag, page=num_page, per_page=10)
-        videos = output["videos"]
-        # output = api.popular_videos(query=tag)
-        print(output)
+        try:
+            videos = output["videos"]
+        except KeyError:
+            continue
+
         if len(output["videos"]) == 0:
             print("not found")
             continue
 
-        filtered_videos = [video for video in videos if video["width"] < video["height"] and str(video["id"]) not in id_l]
+        test_duration = [video for video in videos if video[
+                               "duration"] >= duration]
+        test_width = [video for video in videos if
+                           video["width"] < video["height"]]
+        test_idl = [video for video in videos if
+                            str(video["id"]) not in id_l ]
+
+        filtered_videos = [video for video in videos if str(video["id"]) not in id_l and video["id"] not in id_l and video["width"] < video["height"] and video["duration"] >= duration]
 
         if len(filtered_videos) == 0:
-            print("not found")
+            print("not found there")
             continue
 
         idx = 0
@@ -68,52 +76,52 @@ def download_video(type_of_videos, folder, id_l, vertical=True):
         name = parts[-2]
         url_video = 'https://www.pexels.com/video/' + str(id) + '/download'  # create the url with the video id
         path = '/Users/emmanuellandau/Documents/mediaLibrary/' + str(id) + '.mp4'
-        if not check_file_exists(bibli_path, str(id)):
+
+        if not check_file_exists(bibli_path, str(id)) and id not in id_l:
             r = requests.get(url_video)
             with open(path, 'wb') as outfile:
                 outfile.write(r.content)
 
         set_finder_comment(path, name)
         id_l.append(id)
+        print("id_l", id_l)
         return path, id_l
-    # si aucune vidéo chercher des phots
-    for tag in tags:
-
-        output = api.search_photos(query=tag, page=num_page, per_page=10)
-        print(output)
-        videos = output["photos"]
-        # output = api.popular_videos(query=tag)
-        print(output)
-        if len(output["photos"]) == 0:
-            print("not found")
-            continue
-
-        filtered_videos = [video for video in videos if video["width"] < video["height"] and str(video["id"]) not in id_l]
-
-        if len(filtered_videos) == 0:
-            print("not found")
-            continue
-
-        idx = 0
-        id = filtered_videos[idx]["id"]
-        url = filtered_videos[idx]["url"]
-        parts = url.split("/")
-        name = parts[-2]
-        url_video = filtered_videos[idx]['src']['original']  # create the url with the video id
-        path = '/Users/emmanuellandau/Documents/mediaLibrary/' + str(id) + ".png"
-        if not check_file_exists("/Users/emmanuellandau/Documents/mediaLibrary", str(id)):
-            r = requests.get(url_video)
-            with open(path, 'wb') as outfile:
-                outfile.write(r.content)
-            set_finder_comment(path, name)
-
-
-
-        print(get_finder_comment(path))
-        id_l.append(id)
-        return path, id_l  # download the picture
-
-    return None
+    # if pic :
+    #     # si aucune vidéo chercher des phots
+    #     for tag in tags:
+    #
+    #         output = api.search_photos(query=tag, page=num_page, per_page=10)
+    #         print(output)
+    #         videos = output["photos"]
+    #         # output = api.popular_videos(query=tag)
+    #         print(output)
+    #         if len(output["photos"]) == 0:
+    #             print("not found")
+    #             continue
+    #
+    #         filtered_videos = [video for video in videos if video["width"] < video["height"] and str(video["id"]) not in id_l]
+    #
+    #         if len(filtered_videos) == 0:
+    #             print("not found")
+    #             continue
+    #
+    #         idx = 0
+    #         id = filtered_videos[idx]["id"]
+    #         url = filtered_videos[idx]["url"]
+    #         parts = url.split("/")
+    #         name = parts[-2]
+    #         url_video = filtered_videos[idx]['src']['original']  # create the url with the video id
+    #         path = '/Users/emmanuellandau/Documents/mediaLibrary/' + str(id) + ".png"
+    #         if not check_file_exists("/Users/emmanuellandau/Documents/mediaLibrary", str(id)):
+    #             r = requests.get(url_video)
+    #             with open(path, 'wb') as outfile:
+    #                 outfile.write(r.content)
+    #             set_finder_comment(path, name)
+    #
+    #         print(get_finder_comment(path))
+            # id_l.append(id)
+            # return path, id_l  # download the picture
+    return None, id_l
 
 
 def download_media(api, tag, media_type,folder, vertical=True):
@@ -171,4 +179,4 @@ def download_videoV2(type_of_videos, vertical=True):
 
 # Exemple d'utilisation
 
-# download_video(["personality test chart", "ISTP keyword", "psychology diagram"])
+print(download_video(["caring"], []))
