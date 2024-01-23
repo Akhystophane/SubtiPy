@@ -123,60 +123,62 @@ def download_video(type_of_videos, id_l, vertical=True, duration=0.0, pic=False)
             # return path, id_l  # download the picture
     return None, id_l
 
-
-def download_media(api, tag, media_type,folder, vertical=True):
-
-    bibli_path = os.path.join(folder, "library")
-    MEDIA_LIBRARY_PATH = bibli_path
-    search_function = api.search_videos if media_type == 'videos' else api.search_photos
-    output = search_function(query=tag, page=1, per_page=10)
-    print(output)
-
-    if not output[media_type]:
-        print("not found")
-        return None
-
-    media_list = output[media_type]
-    filtered_media = [media for media in media_list if
-                      (media["width"] < media["height"]) == vertical and not check_file_exists(MEDIA_LIBRARY_PATH,
-                                                                                               str(media["id"]))]
-
-    if not filtered_media:
-        print("not found")
-        return None
-
-    media = filtered_media[0]  # Select the first media
-    id = media["id"]
-    url = media["url"] if media_type == 'videos' else media['src']['original']
-
-    response = requests.get(url)
-    if response.status_code == 200:
-        extension = '.mp4' if media_type == 'videos' else '.png'
-        path = f'{MEDIA_LIBRARY_PATH}{id}{extension}'
-        with open(path, 'wb') as outfile:
-            outfile.write(response.content)
-
-        set_finder_comment(path, tag)
-        print(get_finder_comment(path))
-        return path
-    else:
-        print("Failed to download media.")
-        return None
-
-
-def download_videoV2(type_of_videos, vertical=True):
+def feed_back(type_of_videos, id_l, timestamps, feedback_l, duration=0.0):
+    tags = type_of_videos
     api = Pexels(API_KEY)
-
-    for media_type in ['videos', 'photos']:
-        for tag in type_of_videos:
-            path = download_media(api, tag, media_type, vertical)
-            if path:
-                return path  # Return the path of the first successfully downloaded media
-
-    return None
+    num_page = 1
+    ids = []
+    path = None
+    phrase = ""
 
 
+    for tag in tags:
 
-# Exemple d'utilisation
+        output = api.search_videos(query=tag, page=num_page, per_page=10)
+        try:
+            videos = output["videos"]
+        except KeyError:
+            continue
 
-print(download_video(["caring"], []))
+        if len(output["videos"]) == 0:
+            print("not found")
+            continue
+
+        filtered_videos = [video for video in videos if str(video["id"]) not in id_l and video["id"] not in id_l and video["width"] < video["height"] and video["duration"] >= duration]
+
+        if len(filtered_videos) == 0:
+            print("not found there")
+            continue
+
+        idx = 0
+        id = filtered_videos[idx]["id"]
+        url = filtered_videos[idx]["url"]
+        parts = url.split("/")
+        name = parts[-2]
+        url_video = 'https://www.pexels.com/video/' + str(id) + '/download'  # create the url with the video id
+        path = '/Users/emmanuellandau/Documents/mediaLibrary/' + str(id) + '.mp4'
+
+        id_l.append(id)
+        ids.append(id)
+
+
+        print("id_l : ", id_l)
+
+    feedback_l[timestamps] = ids
+
+    return feedback_l, id_l
+
+def feedb_download(feedb_dict):
+    bibli_path = "/Users/emmanuellandau/Documents/mediaLibrary"
+    for timestamps, id in feedb_dict.items():
+        url_video = 'https://www.pexels.com/video/' + str(id) + '/download'  # create the url with the video id
+        path = '/Users/emmanuellandau/Documents/mediaLibrary/' + str(id) + '.mp4'
+        if not check_file_exists(bibli_path, str(id)):
+            r = requests.get(url_video)
+            with open(path, 'wb') as outfile:
+                outfile.write(r.content)
+        feedb_dict[timestamps] = path
+
+    return feedb_dict
+
+

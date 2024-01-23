@@ -72,7 +72,7 @@ def get_ready(Lab_path, niche, check_condition=False, break_after_first=False):
             else:
                 words_highlight(folder)
                 emoji_suggester(folder)
-                # music_suggester(folder)
+                music_suggester(folder)
 
             shutil.move(folder, destination_folder)
 
@@ -116,8 +116,8 @@ def get_done(Lab_path):
             shutil.move(fold, destination_folder)
     return True
 
-get_ready("/Users/emmanuellandau/Documents/EditLab", "astrologenial")
-# get_done("/Users/emmanuellandau/Documents/EditLab")
+# get_ready("/Users/emmanuellandau/Documents/EditLab", "astrologenial")
+get_done("/Users/emmanuellandau/Documents/EditLab")
 
 
 

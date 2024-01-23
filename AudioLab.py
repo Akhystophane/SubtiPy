@@ -105,7 +105,7 @@ def dump_srt(folder):
 # folder = "/Users/emmanuellandau/Documents/EditLab/TODO/conseil"
 
 # transcribe_audio()
-# make_voice(dossier_principal)
+make_voice(dossier_principal)
 # dump_                                                                                                                                                                                                                                       srt(folder)
 from moviepy.editor import *
 import whisper

@@ -4,6 +4,7 @@ import shutil
 import subprocess
 from AudioLab import dump_srt
 from accounts.RedditStories.R_functions import do_script_file
+from functions import mp4_to_mp3
 from suggesterLab.SuggesterAi import emoji_suggester, music_suggester
 from suggesterLab.footageSuggester import create_dict3, get_footage_dict
 from suggesterLab.functions import key_exists_in_json, update_json, time_to_seconds
@@ -57,15 +58,16 @@ def get_ready(Lab_path, niche, check_condition=False, break_after_first=False):
         if os.path.isdir(chemin):
             folder = chemin
             folder = folder + "/"
+            mp4_to_mp3(folder)
             dump_srt(folder)
-            # fichiers_supprimes = do_script_file(folder, fichiers_supprimes, niche)
+            fichiers_supprimes = do_script_file(folder, fichiers_supprimes, niche)
 
 
 
             if check_condition:
                 if not key_exists_in_json(os.path.join(folder, "edit_data.json"), "Words"):
                     words_highlight(folder)
-                    # emoji_suggester(folder)
+                    emoji_suggester(folder)
                     # music_suggester(folder)
                 else:
                     print("deja fait")
@@ -118,7 +120,7 @@ def get_done(Lab_path):
 
 # get_ready("/Users/emmanuellandau/Documents/EditLab", "reddit_stories")
 
-get_done("/Users/emmanuellandau/Documents/EditLab")
+# get_done("/Users/emmanuellandau/Documents/EditLab")
 
 
 
