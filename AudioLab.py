@@ -26,15 +26,18 @@ def make_voice(dossier_principal):
     # Recherche du fichier "description.txt"
     if "description.txt" in fichiers:
       if not 'audio.mp3' in fichiers:
+        male = "G7xH3hmwHsuqBz5TIhkC"
+        female = "8IBKhZKqVZolbCCcNSPI"
         chemin_description = os.path.join(dossier, "description.txt")
         with open(chemin_description, 'r', encoding='utf8') as txt_file:
           txt_content = txt_file.read()
         print(txt_content)
         audio = generate(
           text=txt_content,
-          voice="G7xH3hmwHsuqBz5TIhkC",
+          voice= male,
           model="eleven_multilingual_v1"
         )
+
         # Construction du chemin du fichier audio
         chemin_audio = os.path.join(dossier, "audio.mp3")
         save(audio, chemin_audio)
@@ -74,7 +77,7 @@ from transformers import pipeline
 #     return srtFilename
 import faster_whisper
 import stable_whisper
-def dump_srt(folder):
+def dump_srt(folder, max_words=2):
 
   srt_path = os.path.join(folder, "audio.srt")
   audio_path = os.path.join(folder, "audio.mp3")
@@ -86,15 +89,15 @@ def dump_srt(folder):
     return True
   # model = stable_whisper.load_faster_whisper('medium', compute_type="float32")
   # result = model.transcribe_stable(audio_path, language="fr")
-  model = stable_whisper.load_model('medium')
+  model = stable_whisper.load_model('large-v3')
   # result = model.align(audio_path, txt)
   # initial_prompt="signes astrologiques : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons"
-  result = model.transcribe(audio_path, fp16=False, language="french", prompt="signes astrologiques : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons")
+  result = model.transcribe(audio_path, fp16=False, prompt="signes astrologiques : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons, j'aime, like")
   print(result)
   result = (
       result
-      .split_by_length(max_words=2)
-      .split_by_gap(max_gap=0.01)
+      .split_by_length(max_words=max_words)
+      .split_by_gap(max_gap=0.1)
       .merge_by_punctuation(["'","-"])
       # .split_by_length(max_words=3)
   )
@@ -108,9 +111,16 @@ def dump_srt(folder):
 make_voice(dossier_principal)
 # dump_                                                                                                                                                                                                                                       srt(folder)
 from moviepy.editor import *
+from pydub import AudioSegment
+
+# Load your M4A file
+# m4a_audio = AudioSegment.from_file("/Users/emmanuellandau/Documents/EditLab/TODO/entretiens/Cyrille mazure.m4a", format="m4a")
+
+# Convert to MP3
+# m4a_audio.export("/Users/emmanuellandau/Documents/EditLab/TODO/entretiens/audio.mp3", format="mp3")
 import whisper
-mp3_path = "/Users/emmanuellandau/Downloads/audio.mp3"
-text_path = "/Users/emmanuellandau/Downloads/srt_txt.mp3"
+mp3_path = "/Users/emmanuellandau/Downloads/marketing_interview.mp3"
+# text_path = "/Users/emmanuellandau/Downloads/marketing_interview_txt.mp3"
 # video = VideoFileClip("/Users/emmanuellandau/Downloads/Download (1).mp4")
 # audio = video.audio
 #
@@ -122,4 +132,4 @@ text_path = "/Users/emmanuellandau/Downloads/srt_txt.mp3"
 # model.transcribe(mp3_path, fp16=False)
 # result = model.transcribe(mp3_path)
 # result.to_srt_vtt(text_path, segment_level=True, word_level=False)
-# dump_srt("/Users/emmanuellandau/Documents/EditLab/TODO/test")
+# dump_srt("/Users/emmanuellandau/Documents/movieLib/You/edit1")

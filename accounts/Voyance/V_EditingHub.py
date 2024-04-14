@@ -1,20 +1,15 @@
-import json
 import os
 import shutil
 import subprocess
 from AudioLab import dump_srt
-from Google.Folder_management import synchronize_subfolders, find_folder_id
-from accounts.RedditStories.R_functions import do_script_file
-from functions import mp4_to_mp3
-from suggesterLab.SuggesterAi import emoji_suggester, music_suggester
+from suggesterLab.SuggesterAi import emoji_suggester, do_script_file, music_suggester
 from suggesterLab.footageSuggester import create_dict3, get_footage_dict
 from suggesterLab.functions import key_exists_in_json, update_json, time_to_seconds
 from word_interest import words_highlight
-
-
 def ae_script():
-    # Scripts_Adobe/Stories/aE-editor.jsx
-    command = '''osascript -e "with timeout of 1200 seconds" -e "tell application \\"Adobe After Effects 2023\\" to activate" -e "tell application \\"Adobe After Effects 2023\\" to DoScriptFile \\"/Users/emmanuellandau/Scripts_Adobe/aE-test.jsx\\"" -e "end timeout"'''
+    # Commande à exécuter
+    command = '''osascript -e "tell application \\"Adobe After Effects 2023\\" to activate" -e "tell application \\"Adobe After Effects 2023\\" to DoScriptFile \\"/Users/emmanuellandau/Scripts_Adobe/aE-test.jsx\\""'''
+    command = '''osascript -e "with timeout of 300 seconds" -e "tell application \\"Adobe After Effects 2023\\" to activate" -e "tell application \\"Adobe After Effects 2023\\" to DoScriptFile \\"/Users/emmanuellandau/Scripts_Adobe/aE-test.jsx\\"" -e "end timeout"'''
 
     # Exécuter la commande et récupérer la sortie
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -59,23 +54,20 @@ def get_ready(Lab_path, niche, check_condition=False, break_after_first=False):
         if os.path.isdir(chemin):
             folder = chemin
             folder = folder + "/"
-            mp4_to_mp3(folder)
             dump_srt(folder)
-            fichiers_supprimes = do_script_file(folder, fichiers_supprimes, niche, d_id=False, dalee=True)
-
-
+            fichiers_supprimes = do_script_file(folder, fichiers_supprimes, niche)
 
             if check_condition:
                 if not key_exists_in_json(os.path.join(folder, "edit_data.json"), "Words"):
                     words_highlight(folder)
                     emoji_suggester(folder)
-                    # music_suggester(folder)
+                    music_suggester(folder)
                 else:
                     print("deja fait")
             else:
                 words_highlight(folder)
                 emoji_suggester(folder)
-                # music_suggester(folder)
+                music_suggester(folder)
 
             shutil.move(folder, destination_folder)
 
@@ -118,13 +110,3 @@ def get_done(Lab_path):
                     return False
             shutil.move(fold, destination_folder)
     return True
-
-get_ready("/Users/emmanuellandau/Documents/EditLab", "reddit_stories", break_after_first=True, check_condition=True)
-# id = find_folder_id("TODO")
-# synchronize_subfolders("/Users/emmanuellandau/Documents/EditLab/READY", id)
-
-get_done("/Users/emmanuellandau/Documents/EditLab")
-
-
-
-

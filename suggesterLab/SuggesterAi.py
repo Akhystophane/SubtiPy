@@ -6,9 +6,12 @@ import json
 import shutil
 import re
 import openai
+from openai import OpenAI
+
+from functions import zeroed_timestamp
 from suggesterLab.Emojis import convert_emoji
 from suggesterLab.footageSuggester import get_footage_dict, create_dict3
-from suggesterLab.functions import update_json, extract_dict, get_char, formatter_srt, time_to_seconds
+from suggesterLab.functions import update_json, extract_dict, get_char, formatter_srt, time_to_seconds, formatter_srtV2
 import tiktoken
 import os
 
@@ -52,16 +55,25 @@ def emoji_suggester(folder):
       le dict renvoyé). Ta réponse ne doit contenir que le dictionnaire, pas d'autre texte parasite qui fera
        crasher mon programme."""
 
-    response = openai.ChatCompletion.create(
+    # response = openai.ChatCompletion.create(
+    #     model="gpt-4",
+    #     messages=[
+    #         {"role": "system", "content": "Tu es un assistant programmeur rigoureux"},
+    #         {"role": "user", "content": prompt2}
+    #     ]
+    # )
+    # print({response['choices'][0]['message']['content']})
+    client = OpenAI()
+    completion = client.chat.completions.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": "Tu es un assistant programmeur rigoureux"},
+            {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt2}
         ]
     )
-    print({response['choices'][0]['message']['content']})
+    print(str(completion.choices[0].message.content))
     chemin_fichier = folder + "edit_data.json"
-    emojis_l = extract_dict(response['choices'][0]['message']['content'])
+    emojis_l = extract_dict(str(completion.choices[0].message.content))
     update_json(chemin_fichier, "Emojis", emojis_l)
     save_png_emoji(emojis_l)
     return emojis_l
@@ -173,6 +185,23 @@ def get_relevant_signs(folder, signes):
 
     return list(relevant_signs)
 
+def get_relevant_signs(folder, signes):
+    relevant_signs = []  # Liste pour garder la trace des sous-titres pertinents
+    chemin_fichier = folder + "/audio.srt"  # Assurez-vous d'ajouter un slash ici pour le chemin correct
+
+    with open(chemin_fichier, 'r', encoding='utf-8') as fichier:  # Ajout de l'encodage si nécessaire
+        content = fichier.read().strip().split('\n\n')
+        for subtitle in content:
+            lines = subtitle.split('\n')
+            subtitle_number = lines[0]
+            subtitle_text = ' '.join(lines[2:])  # Concatène toutes les lignes de texte du sous-titre
+            found_signs = [sign for sign in signes if sign in subtitle_text]
+            if found_signs:
+                relevant_signs.append([subtitle_number] + found_signs)  # Ajoute le numéro de sous-titre et les signes trouvés
+
+    return relevant_signs
+
+
 def find_path(png_name, niche):
     """
     Trouve le chemin d'un png depuis un dictionnaire jusqu'à un dossier principal.
@@ -250,7 +279,7 @@ def remplacer_numeros_par_timestamps(dictionnaire, fichier_srt):
 
     # Vérifier que le dictionnaire n'est pas trop petit
     if len(nouveau_dictionnaire) <= 4:
-        raise Exception("Le dictionnaire est trop petit")
+        raise Exception("Le dictionnaire est trop petit: ", nouveau_dictionnaire)
 
     # Ajouter le dernier timestamp avec la clé "last.mp4"
     if dernier_timestamp:
@@ -262,30 +291,38 @@ def do_script_file(folder, fichiers_supprimes, niche):
     def remplacer_par_fichier_aleatoire(bibli, fichiers_supprimes, script_text):
         print("bibli", bibli)
         fichiers_disponibles = None
+        cles_a_supprimer = []  # Liste pour stocker les clés à supprimer
         for num_sous_titre, sous_dossier in script_text.items():
             if sous_dossier == "last.mp4":
                 continue
             # Liste des fichiers disponibles dans le sous-dossier
-            if ".png" in sous_dossier:
+            elif ".png" in sous_dossier:
                 fichier_choisi = re.search(r'[^/\[\]]+\.png', sous_dossier).group()
                 script_text[num_sous_titre] = find_path(fichier_choisi, niche)
                 print(f"le chemin de {sous_dossier} est {find_path(fichier_choisi, niche)}")
 
-            if not ".png" in sous_dossier:
-                fichiers_disponibles = [f for f in bibli[sous_dossier] if f not in fichiers_supprimes.get(sous_dossier, [])]
+            # if not ".png" in sous_dossier:
+            #     fichiers_disponibles = [f for f in bibli[sous_dossier] if f not in fichiers_supprimes.get(sous_dossier, [])]
 
-            if fichiers_disponibles and not ".png" in sous_dossier:
+            elif not ".png" in sous_dossier:
                 # Choix aléatoire d'un fichier
+                fichiers_disponibles = [f for f in bibli[sous_dossier] ]
                 fichier_choisi = random.choice(fichiers_disponibles)
 
                 # Mise à jour du script_text
                 script_text[num_sous_titre] = find_path(fichier_choisi, niche)
 
-                # Ajout du fichier aux fichiers supprimés pour éviter les duplicatas
-                if sous_dossier in fichiers_supprimes:
-                    fichiers_supprimes[sous_dossier].append(fichier_choisi)
-                else:
-                    fichiers_supprimes[sous_dossier] = [fichier_choisi]
+                # # Ajout du fichier aux fichiers supprimés pour éviter les duplicatas
+                # if sous_dossier in fichiers_supprimes:
+                #     fichiers_supprimes[sous_dossier].append(fichier_choisi)
+                # else:
+                #     fichiers_supprimes[sous_dossier] = [fichier_choisi]
+            else:
+                cles_a_supprimer.append(num_sous_titre)
+
+            # Suppression des clés après l'itération
+        for cle in cles_a_supprimer:
+            del script_text[cle]
         return fichiers_supprimes, script_text
 
     bibli = get_bibli(niche)
@@ -304,7 +341,7 @@ def do_script_file(folder, fichiers_supprimes, niche):
             if cle != 'signes' and isinstance(valeur, list):
                 dico[cle] = len(valeur)
         with open(folder + "audio.srt", 'r', encoding='utf-8') as file:
-            txt = formatter_srt(file.read())
+            txt = formatter_srtV2(file.read())
     # elif niche == "mbti":
     #     dico, txt = get_dico_mbti()
     # else:
@@ -335,10 +372,13 @@ def do_script_file(folder, fichiers_supprimes, niche):
     # dict1 = {time_to_seconds(time_str): video_path for time_str, video_path in script_text.items()}
 
     dict2 = get_footage_dict(folder, niche)
+    dict2 = {cle: valeur for cle, valeur in dict2.items() if valeur is not None and not isinstance(valeur, str) or (
+                isinstance(valeur, str) and "none" not in valeur.lower())}
     timestamps_l = create_dict3(script_text, dict2)
     timestamps_l = remplacer_numeros_par_timestamps(timestamps_l, folder + "audio.srt")
-    timestamps_l = [[valeur, time_to_seconds(cle)] for cle, valeur in timestamps_l.items()]
-
+    timestamps_l = [[valeur, time_to_seconds(cle)] for cle, valeur in timestamps_l.items() if
+                    cle is not None and valeur is not None]
+    timestamps_l = zeroed_timestamp(timestamps_l)
     chemin_fichier = folder + "edit_data.json"
     print("dico3", timestamps_l)
 
@@ -351,6 +391,12 @@ def normaliser_cle(cle):
 
 import os
 import random
+
+def trouver_premier_chiffre(chaine):
+    for caractere in chaine:
+        if caractere.isdigit():
+            return caractere
+    return None  # Retourne None si aucun chiffre n'est trouvé
 
 def get_random_file_path(base_folder, var):
     # Sélectionnez le sous-dossier en fonction de la variable
@@ -369,14 +415,11 @@ def get_random_file_path(base_folder, var):
         files = [f for f in os.listdir(subfolder_path) if os.path.isfile(os.path.join(subfolder_path, f))]
         if files:
             return os.path.join(subfolder_path, random.choice(files))
-
+    print("erreuuuuuuuuuur---------------------------------------------------------------------------------------------")
     # Si le sous-dossier n'existe pas, ne contient pas de fichiers ou si une autre erreur se produit, retournez None
     return None
 
-# Test de la fonction
-base_folder = 'chemin_du_dossier_principal'
-var = 1
-print(get_random_file_path(base_folder, var))
+
 
 def music_suggester(folder):
     titre = os.path.basename(os.path.normpath(folder))
@@ -395,7 +438,7 @@ def music_suggester(folder):
     )
     num = response['choices'][0]['message']['content']
     try:
-        int(num)
+        num = int(trouver_premier_chiffre(num))
     except:
         print(f"num est{num} ce n'est pas valide !!!!")
         num = 3

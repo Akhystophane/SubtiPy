@@ -117,68 +117,7 @@ def lister_fichiers(dossier):
 
 # questions = [f"La plus grande force des {mbti_type}s" for mbti_type in mbti_types]
 
-titres_videos = [
-    "La colère du Bélier",
-    "La colère du Taureau",
-    "La colère du Gémeaux",
-    "La colère du Cancer",
-    "La colère du Lion",
-    "La colère de la Vierge",
-    "La colère de la Balance",
-    "La colère du Scorpion",
-    "La colère du Sagittaire",
-    "La colère du Capricorne",
-    "La colère du Verseau",
-    "La colère du Poissons",
-    "Pourquoi les Béliers sont si impulsifs",
-    "Pourquoi les Taureaux sont si tenaces",
-    "Pourquoi les Gémeaux sont si curieux",
-    "Pourquoi les Cancers sont si protecteurs",
-    "Pourquoi les Lions sont si fiers",
-    "Pourquoi les Vierges sont si méticuleux",
-    "Pourquoi les Balances sont si équilibrés",
-    "Pourquoi les Scorpions sont si intenses",
-    "Pourquoi les Sagittaires sont si aventuriers",
-    "Pourquoi les Capricornes sont si disciplinés",
-    "Pourquoi les Verseaux sont si originaux",
-    "Pourquoi les Poissons sont si rêveurs",
-    "Si tu es Bélier et que tu vois cette vidéo avant le 30 janvier",
-    "Si tu es Taureau et que tu vois cette vidéo avant le 30 janvier",
-    "Si tu es Gémeaux et que tu vois cette vidéo avant le 30 janvier",
-    "Si tu es Cancer et que tu vois cette vidéo avant le 30 janvier",
-    "Si tu es Lion et que tu vois cette vidéo avant le 30 janvier",
-    "Si tu es Vierge et que tu vois cette vidéo avant le 30 janvier",
-    "Si tu es Balance et que tu vois cette vidéo avant le 30 janvier",
-    "Si tu es Scorpion et que tu vois cette vidéo avant le 30 janvier",
-    "Si tu es Sagittaire et que tu vois cette vidéo avant le 30 janvier",
-    "Si tu es Capricorne et que tu vois cette vidéo avant le 30 janvier",
-    "Si tu es Verseau et que tu vois cette vidéo avant le 30 janvier",
-    "Si tu es Poissons et que tu vois cette vidéo avant le 30 janvier",
-    "Les trois signes compatibles en amour avec les Béliers",
-    "Les trois signes compatibles en amour avec les Taureaux",
-    "Les trois signes compatibles en amour avec les Gémeaux",
-    "Les trois signes compatibles en amour avec les Cancers",
-    "Les trois signes compatibles en amour avec les Lions",
-    "Les trois signes compatibles en amour avec les Vierges",
-    "Les trois signes compatibles en amour avec les Balances",
-    "Les trois signes compatibles en amour avec les Scorpions",
-    "Les trois signes compatibles en amour avec les Sagittaires",
-    "Les trois signes compatibles en amour avec les Capricornes",
-    "Les trois signes compatibles en amour avec les Verseaux",
-    "Les trois signes compatibles en amour avec les Poissons"
-]
-
-
-
-
-
-
-
-
-
-
-
-
-
+titres_videos = ['Le rapprochement de la Lune et Régulus', '19 avril Lune près de Mercure','20 avril, Grand alignement planétaire', 'conjonction Jupiter-Uranus 20 avril', 'conjonction 29 avril, Mars-Neptune ',
+                 'Pleine Lune, 23 avril', 'Pluies de météores en avril 2024', '16 avril, Eclipse partielle']
 
 create_folders_concept("/Users/emmanuellandau/Documents/EditLab/TODO", titres_videos)

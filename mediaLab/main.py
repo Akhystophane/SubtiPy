@@ -1,3 +1,5 @@
+
+import json
 import os
 import random
 import requests
@@ -128,13 +130,10 @@ def feed_back(type_of_videos, id_l, timestamps, feedback_l, duration=0.0):
     api = Pexels(API_KEY)
     num_page = 1
     ids = []
-    path = None
-    phrase = ""
-
 
     for tag in tags:
 
-        output = api.search_videos(query=tag, page=num_page, per_page=10)
+        output = api.search_videos(query= tag, page=num_page, per_page=10)
         try:
             videos = output["videos"]
         except KeyError:
@@ -157,11 +156,8 @@ def feed_back(type_of_videos, id_l, timestamps, feedback_l, duration=0.0):
         name = parts[-2]
         url_video = 'https://www.pexels.com/video/' + str(id) + '/download'  # create the url with the video id
         path = '/Users/emmanuellandau/Documents/mediaLibrary/' + str(id) + '.mp4'
-
         id_l.append(id)
         ids.append(id)
-
-
         print("id_l : ", id_l)
 
     feedback_l[timestamps] = ids
@@ -182,3 +178,90 @@ def feedb_download(feedb_dict):
     return feedb_dict
 
 
+# Remplacez 'YOUR_API_KEY' par votre clé d'API réelle
+def get_collections():
+    url = 'https://api.pexels.com/v1/collections/'
+
+    # Les paramètres pour la requête
+    params = {
+        'sort': 'desc'
+    }
+
+    # Ajout de l'en-tête d'autorisation
+    headers = {
+        'Authorization': API_KEY
+    }
+
+    # Effectuer la requête GET
+    response = requests.get(url, headers=headers, params=params)
+
+    # Vérifier si la requête a réussi
+    if response.status_code == 200:
+        # Imprimer le contenu de la réponse (ou vous pouvez le traiter comme vous voulez)
+        output = response.json()
+        collections = output["collections"]
+        collections_repo = {}
+
+        collection_idx = 0
+        for collection in collections:
+            collection_title = output["collections"][collection_idx]['title']
+            collection_url = f"{url}/{collection['id']}/"
+            collection_data = requests.get(collection_url, headers=headers)
+            collection_data = collection_data.json()
+            filtered_videos = collection_data["media"]
+            collections_repo[collection_title] = filtered_videos
+            collection_idx += 1
+
+        with open(os.path.join("repo.json"), 'w') as file:
+            json.dump(collections_repo, file, indent=1)
+
+    else:
+        print(f"Erreur lors de la requête: {response.status_code}")
+
+def download_collections():
+    with open('repo.json', 'r') as file:
+        collections = json.load(file)
+    headers = {'Authorization': API_KEY}
+    bibli_path = "/Users/emmanuellandau/PycharmProjects/SubtiPy/mediaLab/bibli"
+    for collections_title, collection in collections.items():
+        filtered_videos = collection
+        for i in range(len(collection)):
+            id = filtered_videos[i]["id"]
+            print(id)
+            download_url = 'https://www.pexels.com/video/' + str(id) + '/download'
+            local_path = '/Users/emmanuellandau/PycharmProjects/SubtiPy/mediaLab/bibli/' + str(id) + '.mp4'
+            if not check_file_exists(bibli_path, str(id)):
+                r = requests.get(download_url, headers=headers)
+                if r.status_code == 200:
+                    with open(local_path, 'wb') as outfile:
+                        outfile.write(r.content)
+                else:
+                    print('erreur',r)
+            else:
+                print("fichier déjà enregistré")
+
+            filtered_videos[i]["local_path"] = local_path
+
+    with open('repo.json', 'w') as file:
+        json.dump(collections, file, indent=1)
+
+
+def collection_suggester(feedb_dict):
+    with open('/Users/emmanuellandau/PycharmProjects/SubtiPy/mediaLab/repo.json', 'r') as file:
+        collections = json.load(file)
+    for timestamps, emotion in feedb_dict.items():
+        footage_path = None
+
+
+        for collections_title, collection in collections.items():
+            # print(collections_title, emotion_safe)
+            if collections_title == emotion:
+               footage_data =  random.choice(collection)
+               footage_path = footage_data["local_path"]
+               break
+            else:
+                continue
+
+        feedb_dict[timestamps] = footage_path
+
+    return feedb_dict

@@ -2,6 +2,7 @@ import os
 import shutil
 import subprocess
 
+from AudioLab import dump_srt
 from suggesterLab.SuggesterAi import emoji_suggester
 from suggesterLab.functions import key_exists_in_json
 from word_interest import words_highlight
@@ -53,6 +54,7 @@ def get_ready(Lab_path, check_condition=False, break_after_first=False):
         if os.path.isdir(chemin):
             folder = chemin
             folder = folder + "/"
+            dump_srt(folder)
 
             if check_condition:
                 if not key_exists_in_json(os.path.join(folder, "edit_data.json"), "Words"):
@@ -90,8 +92,8 @@ def get_done(Lab_path):
             shutil.move(fold, destination_folder)
     return True
 
-# get_ready("/Users/emmanuellandau/Documents/EditLab")
-get_done("/Users/emmanuellandau/Documents/EditLab")
+get_ready("/Users/emmanuellandau/Documents/movieLib/You")
+# get_done("/Users/emmanuellandau/Documents/EditLab")
 
 # ae_script()
 

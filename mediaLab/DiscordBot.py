@@ -74,18 +74,21 @@ def patterned(prompt):
 
 def load_bot(driver):
     driver.get("https://discord.com/channels/@me/1120828783230984293")
-    email_txtbox = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.XPATH, "//*[@id='uid_5']")))
-    email_txtbox.send_keys("emnl.busi@outlook.fr")
-    password_txtbox = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.XPATH, "//*[@id='uid_7']")))
-    password_txtbox.send_keys("axxsarac3")
-    WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((
-            By.XPATH, "//*[@id='app-mount']/div[2]/div[1]/div[1]/div/div/div/div/form/div[2]/div/div[1]/div[2]/button[2]"))).click()
-    time.sleep(3)
-    driver.get("https://discord.com/channels/@me/1120828783230984293")
-    time.sleep(3)
+    for _ in range(1):
+        email_txtbox = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, "//*[@id='uid_7']")))
+        email_txtbox.send_keys("emnl.busi@outlook.fr")
+        password_txtbox = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, "//*[@id='uid_9']")))
+        password_txtbox.send_keys("voVsic-medtek-7cyfva")
+        WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((
+                By.XPATH, "//*[@id='app-mount']/div[2]/div[1]/div[1]/div/div/div/div/form/div[2]/div/div[1]/div[2]/button[2]"))).click()
+        time.sleep(3)
+        # time.sleep(20)
+        driver.get("https://discord.com/channels/@me/1120828783230984293")
+        time.sleep(3)
+
 
 
 def generate_img(driver, prompt, folder):
@@ -110,9 +113,12 @@ def generate_img(driver, prompt, folder):
     elements = WebDriverWait(driver, 20).until(
         EC.presence_of_all_elements_located((By.XPATH, "//*[contains(@id, 'message-accessories-')]")))
     id_pic = elements[-1].get_attribute('id')
+    u_path = f"//*[@id='{id_pic}']/div[2]/div[1]/div/button[{random.randint(1,4)}]"
+    time.sleep(1.5)
+    print(u_path)
     WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((
-            By.XPATH, f"//*[@id='{id_pic}']/div[2]/div[1]/div/button[{random.randint(1,4)}]"))).click()
+            By.XPATH, u_path))).click()
     number = 0
     while number < 2:
         number = len(WebDriverWait(driver, 200).until(

@@ -61,7 +61,7 @@ def get_ready(Lab_path, niche, check_condition=False, break_after_first=False):
             folder = folder + "/"
             mp4_to_mp3(folder)
             dump_srt(folder)
-            fichiers_supprimes = do_script_file(folder, fichiers_supprimes, niche, d_id=False, dalee=True)
+            fichiers_supprimes = do_script_file(folder, fichiers_supprimes, niche, d_id=False, dalee=True, script=False)
 
 
 
@@ -83,48 +83,3 @@ def get_ready(Lab_path, niche, check_condition=False, break_after_first=False):
                 break
 
     return True
-
-
-def get_done(Lab_path):
-    """
-    Automates video processing in a 'Lab' working environment.
-
-    The 'Lab' folder contains three sub-folders: 'TODO', 'READY', and 'DONE'.
-    'get_done' manages the folders in 'READY', where each folder represents a video ready for editing.
-
-    Process:
-    - For each folder in 'READY', checks if 'edit_data.json' exists. This file contains essential information for video
-     editing.
-    - Executes 'ae_script()' for editing the video. This script should return 0 to indicate success.
-    - Upon success, moves the processed folder to the 'DONE' directory, thus marking the completion of the video's
-     processing.
-    - If 'ae_script()' fails (returns a non-zero value), the function reports an error and stops, returning 'False'.
-    :param Lab_path:
-    :return:
-    """
-    source_folder = os.path.join(Lab_path, "READY")
-    destination_folder = os.path.join(Lab_path, "DONE")
-    for nom in os.listdir(source_folder):
-        chemin = os.path.join(source_folder, nom)
-        print(nom)
-        if os.path.isdir(chemin):
-            folder = chemin
-            fold = folder
-            folder = folder + "/"
-            chemin_fichier = os.path.join(folder, "edit_data.json")
-            if os.path.exists(chemin_fichier):
-                output = ae_script()
-                if output != 0:
-                    return False
-            shutil.move(fold, destination_folder)
-    return True
-
-get_ready("/Users/emmanuellandau/Documents/EditLab", "reddit_stories", break_after_first=True, check_condition=True)
-# id = find_folder_id("TODO")
-# synchronize_subfolders("/Users/emmanuellandau/Documents/EditLab/READY", id)
-
-get_done("/Users/emmanuellandau/Documents/EditLab")
-
-
-
-

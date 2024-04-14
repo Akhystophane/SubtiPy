@@ -35,7 +35,10 @@ def convert_emoji(unicode_text, folder):
     y_pos = 0
     draw.text((x_pos, y_pos), unicode_text, fill="white", embedded_color=True, font=fnt)
     # im.show()
-    im.save(folder+unicode_text+".png")
+    emojis_folder = os.path.join(folder, "emojis")
+    if not os.path.exists(emojis_folder):
+        os.makedirs(emojis_folder)
+    im.save(os.path.join(emojis_folder, unicode_text + ".png"))
 
 # convert_emoji("🤣", "/Users/emmanuellandau/PycharmProjects/SubtiPy/suggesterLab")
 # from PIL import Image, ImageDraw, ImageFont

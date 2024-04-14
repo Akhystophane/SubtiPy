@@ -9,10 +9,10 @@ from suggesterLab.functions import key_exists_in_json, update_json, time_to_seco
 from word_interest import words_highlight
 
 
-def ae_script():
+def ae_script(file):
     # Commande à exécuter
     command = '''osascript -e "tell application \\"Adobe After Effects 2023\\" to activate" -e "tell application \\"Adobe After Effects 2023\\" to DoScriptFile \\"/Users/emmanuellandau/Scripts_Adobe/aE-test.jsx\\""'''
-    command = '''osascript -e "with timeout of 300 seconds" -e "tell application \\"Adobe After Effects 2023\\" to activate" -e "tell application \\"Adobe After Effects 2023\\" to DoScriptFile \\"/Users/emmanuellandau/Scripts_Adobe/aE-test.jsx\\"" -e "end timeout"'''
+    command = f'''osascript -e "with timeout of 300 seconds" -e "tell application \\"Adobe After Effects 2023\\" to activate" -e "tell application \\"Adobe After Effects 2023\\" to DoScriptFile \\"{file}\\"" -e "end timeout"'''
 
     # Exécuter la commande et récupérer la sortie
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -58,9 +58,7 @@ def get_ready(Lab_path, niche, check_condition=False, break_after_first=False):
             folder = chemin
             folder = folder + "/"
             dump_srt(folder)
-            fichiers_supprimes = do_script_file(folder, fichiers_supprimes, niche)
-
-
+            fichiers_supprimes = do_script_file(folder, [], niche)
 
             if check_condition:
                 if not key_exists_in_json(os.path.join(folder, "edit_data.json"), "Words"):
@@ -72,7 +70,7 @@ def get_ready(Lab_path, niche, check_condition=False, break_after_first=False):
             else:
                 words_highlight(folder)
                 emoji_suggester(folder)
-                music_suggester(folder)
+                # music_suggester(folder)
 
             shutil.move(folder, destination_folder)
 
@@ -82,7 +80,7 @@ def get_ready(Lab_path, niche, check_condition=False, break_after_first=False):
     return True
 
 
-def get_done(Lab_path):
+def get_done(Lab_path, file="/Users/emmanuellandau/Scripts_Adobe/aE-test.jsx"):
     """
     Automates video processing in a 'Lab' working environment.
 
@@ -110,14 +108,17 @@ def get_done(Lab_path):
             folder = folder + "/"
             chemin_fichier = os.path.join(folder, "edit_data.json")
             if os.path.exists(chemin_fichier):
-                output = ae_script()
+                output = ae_script(file)
                 if output != 0:
                     return False
             shutil.move(fold, destination_folder)
+        # break
     return True
 
-# get_ready("/Users/emmanuellandau/Documents/EditLab", "astrologenial")
+# get_ready("/Users/emmanuellandau/Documents/EditLab", "astrologenial", check_condition=False)
 get_done("/Users/emmanuellandau/Documents/EditLab")
+
+# get_done("/Users/emmanuellandau/Documents/EditLab", file="/Users/emmanuellandau/Scripts_Adobe/IgMen/aE-editor.jsx")
 
 
 

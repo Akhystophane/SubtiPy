@@ -55,6 +55,46 @@ def formatter_srt(srt_text):
 
     return resultat.strip()
 
+def formatter_srtV2(srt_text, saut=0):
+    # Diviser le texte SRT en blocs
+    blocs = srt_text.strip().split('\n\n')
+
+    resultat = ""
+    afficher_numero = True  # Pour toujours afficher le premier numéro
+    compteur_saut = 0  # Compteur pour le nombre de sauts effectués
+
+    for bloc in blocs:
+        # Séparer les lignes dans chaque bloc
+        lignes = bloc.split('\n')
+
+        # Le premier élément est le numéro du sous-titre
+        numero = lignes[0].strip()
+
+        # Le reste est le texte du sous-titre
+        texte = ' '.join(lignes[2:])
+
+        if afficher_numero:
+            # Ajouter au résultat avec le numéro du sous-titre
+            resultat += f"{{{numero}}} {texte} "
+            compteur_saut = saut  # Réinitialiser le compteur de saut après avoir affiché un numéro
+        else:
+            # Ajouter au résultat sans le numéro du sous-titre
+            resultat += f"{texte} "
+
+        # Déterminer si le numéro doit être affiché pour le prochain sous-titre
+        # Si le compteur de saut est 0, vérifier la fin de la phrase pour déterminer l'affichage du numéro
+        if compteur_saut == 0:
+            afficher_numero = texte.strip().endswith('.')
+        else:
+            # Décrémenter le compteur de saut si un numéro ne doit pas être affiché
+            compteur_saut -= 1
+            afficher_numero = False  # S'assurer que le numéro n'est pas affiché tant que le compteur n'est pas 0
+
+    return resultat.strip()
+
+
+
+
 def time_to_seconds(time_str):
     try:
         # Remplacer le caractère "," par "."
@@ -117,3 +157,29 @@ def extract_dict(text):
     else:
         print("Aucun dictionnaire trouvé dans le texte.")
         return None
+
+
+from pydub import AudioSegment
+
+
+def mp3_to_wav_slice(input_mp3_path, start_seconds, end_seconds, output_wav_path):
+    """
+    Découpe une partie d'un fichier audio MP3 et enregistre l'extrait en format WAV.
+
+    :param input_mp3_path: Chemin vers le fichier MP3 source.
+    :param start_ms: Timestamp de début en millisecondes.
+    :param end_ms: Timestamp de fin en millisecondes.
+    :param output_wav_path: Chemin où enregistrer le fichier WAV résultant.
+    """
+    start_ms = int(start_seconds * 1000)
+    end_ms = int(end_seconds * 1000)
+    # Charger le fichier MP3
+    audio = AudioSegment.from_mp3(input_mp3_path)
+
+    # Découper l'audio du timestamp de début à fin
+    sliced_audio = audio[start_ms:end_ms]
+
+    # Enregistrer l'extrait en format WAV
+    sliced_audio.export(output_wav_path, format="wav")
+
+
