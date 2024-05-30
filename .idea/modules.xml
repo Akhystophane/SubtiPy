@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../Projet-instabot/.idea/Projet-instabot.iml" filepath="$PROJECT_DIR$/../Projet-instabot/.idea/Projet-instabot.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/SubtiPy.iml" filepath="$PROJECT_DIR$/.idea/SubtiPy.iml" />
     </modules>
   </component>

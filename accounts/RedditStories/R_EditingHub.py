@@ -32,7 +32,7 @@ def ae_script():
     return output
 
 
-def get_ready(Lab_path, niche, check_condition=False, break_after_first=False):
+def get_ready(Lab_path, niche, check_condition=False, break_after_first=False, check_up=False):
     """
       Prepares video folders for editing by adding necessary components like SRT files, scripts, highlighted words, emojis, and music.
 
@@ -61,7 +61,7 @@ def get_ready(Lab_path, niche, check_condition=False, break_after_first=False):
             folder = folder + "/"
             mp4_to_mp3(folder)
             dump_srt(folder)
-            fichiers_supprimes = do_script_file(folder, fichiers_supprimes, niche, d_id=False, dalee=True)
+            fichiers_supprimes = do_script_file(folder, fichiers_supprimes, niche, d_id=False, dalee=False, check_up=check_up)
 
 
 
@@ -75,7 +75,7 @@ def get_ready(Lab_path, niche, check_condition=False, break_after_first=False):
             else:
                 words_highlight(folder)
                 emoji_suggester(folder)
-                # music_suggester(folder)
+                music_suggester(folder)
 
             shutil.move(folder, destination_folder)
 
@@ -118,13 +118,14 @@ def get_done(Lab_path):
                     return False
             shutil.move(fold, destination_folder)
     return True
+# get_ready("/Users/emmanuellandau/Documents/EditLab", "astrologenial", break_after_first=False, check_condition=True, check_up=False)
 
-get_ready("/Users/emmanuellandau/Documents/EditLab", "reddit_stories", break_after_first=True, check_condition=True)
+# get_ready("/Users/emmanuellandau/Documents/EditLab", "reddit_stories", break_after_first=False, check_condition=True)
 # id = find_folder_id("TODO")
 # synchronize_subfolders("/Users/emmanuellandau/Documents/EditLab/READY", id)
 
 get_done("/Users/emmanuellandau/Documents/EditLab")
-
-
+# é
+#
 
 

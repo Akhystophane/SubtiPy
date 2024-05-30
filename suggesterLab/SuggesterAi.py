@@ -7,8 +7,6 @@ import shutil
 import re
 import openai
 from openai import OpenAI
-
-from functions import zeroed_timestamp
 from suggesterLab.Emojis import convert_emoji
 from suggesterLab.footageSuggester import get_footage_dict, create_dict3
 from suggesterLab.functions import update_json, extract_dict, get_char, formatter_srt, time_to_seconds, formatter_srtV2
@@ -16,6 +14,55 @@ import tiktoken
 import os
 
 openai.api_key = os.environ["OPENAI_API_KEY"]
+
+signes_astrologiques = [
+    "Bélier",
+    "Taureau",
+    "Gémeaux",
+    "Cancer",
+    "Lion",
+    "Vierge",
+    "Balance",
+    "Scorpion",
+    "Sagittaire",
+    "Capricorne",
+    "Verseau",
+    "Poisson"
+]
+mbti_types = [
+    "ISTJ", "ISFJ", "INFJ", "INTJ",
+    "ISTP", "ISFP", "INFP", "INTP",
+    "ESTP", "ESFP", "ENFP", "ENTP",
+    "ESTJ", "ESFJ", "ENFJ", "ENTJ"
+]
+
+def zeroed_timestamp(obj):
+    """
+    Ajuste le plus petit timestamp de la liste à 0.0 et convertit tous les timestamps en str.
+
+    :param obj: Liste des objets contenant les chemins des fichiers et leurs timestamps.
+    :return: La liste ajustée avec le plus petit timestamp à 0.0 et tous les timestamps en str.
+    """
+    # Convertir les timestamps en flottants pour les manipulations
+    for item in obj:
+        item[1] = float(item[1])
+
+    # Trouver le plus petit timestamp
+    min_timestamp = min(item[1] for item in obj)
+
+    # Ajuster uniquement le premier timestamp à 0.0 si nécessaire
+    if min_timestamp != 0.0:
+        for item in obj:
+            if item[1] == min_timestamp:
+                item[1] = 0.0
+                break  # Ajuster seulement le premier trouvé et sortir de la boucle
+
+    # Convertir les timestamps en chaînes de caractères
+    for item in obj:
+        item[1] = str(item[1])
+
+    return obj
+
 def num_tokens_from_string(string: str, encoding_name: str) -> int:
     encoding = tiktoken.get_encoding(encoding_name)
     num_tokens = len(encoding.encode(string))
@@ -65,7 +112,7 @@ def emoji_suggester(folder):
     # print({response['choices'][0]['message']['content']})
     client = OpenAI()
     completion = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt2}
@@ -185,17 +232,25 @@ def get_relevant_signs(folder, signes):
 
     return list(relevant_signs)
 
-def get_relevant_signs(folder, signes):
+
+
+def get_relevant_signsV2(folder, seuil_max=1):
     relevant_signs = []  # Liste pour garder la trace des sous-titres pertinents
     chemin_fichier = folder + "/audio.srt"  # Assurez-vous d'ajouter un slash ici pour le chemin correct
 
-    with open(chemin_fichier, 'r', encoding='utf-8') as fichier:  # Ajout de l'encodage si nécessaire
+    with open(chemin_fichier, 'r', encoding='utf-8') as fichier:
         content = fichier.read().strip().split('\n\n')
         for subtitle in content:
             lines = subtitle.split('\n')
             subtitle_number = lines[0]
             subtitle_text = ' '.join(lines[2:])  # Concatène toutes les lignes de texte du sous-titre
-            found_signs = [sign for sign in signes if sign in subtitle_text]
+            found_signs = []
+            words = subtitle_text.split()
+            for sign in signes_astrologiques:
+                # Cherche chaque signe dans le texte en utilisant la distance de Levenshtein
+                if any(distance(sign.lower(), word.lower()) <= seuil_max for word in words):
+                    # print(subtitle_number, subtitle_text)
+                    found_signs.append(sign)
             if found_signs:
                 relevant_signs.append([subtitle_number] + found_signs)  # Ajoute le numéro de sous-titre et les signes trouvés
 
@@ -223,26 +278,6 @@ def find_path(png_name, niche):
 
 #-----------------------------------------------------------------------------------------------------------------------
 
-signes_astrologiques = [
-    "Bélier",
-    "Taureau",
-    "Gémeaux",
-    "Cancer",
-    "Lion",
-    "Vierge",
-    "Balance",
-    "Scorpion",
-    "Sagittaire",
-    "Capricorne",
-    "Verseau",
-    "Poisson"
-]
-mbti_types = [
-    "ISTJ", "ISFJ", "INFJ", "INTJ",
-    "ISTP", "ISFP", "INFP", "INTP",
-    "ESTP", "ESFP", "ENFP", "ENTP",
-    "ESTJ", "ESFJ", "ENFJ", "ENTJ"
-]
 
 
 
@@ -348,25 +383,35 @@ def do_script_file(folder, fichiers_supprimes, niche):
     #     dico, txt = None, None
     # print(dico_num)
     prompt = get_char(niche, "prompt_test")
+    # prompt = get_char(niche, "prompt_suspens")
+
     prompt = prompt.replace("{dico_num}", str(dico))
     prompt = prompt.replace("{txt}", str(txt))
 
     print(prompt)
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
+
+    client = OpenAI()
+
+    completion = client.chat.completions.create(
+        model="gpt-4o",
         messages=[
-            {"role": "system", "content": "Tu es un assistant"},
+            {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
         ]
     )
-    print(response['choices'][0]['message']['content'])
 
-    script_text = response['choices'][0]['message']['content']
+    script_text = str(completion.choices[0].message.content)
+
+
     #ligne pour tester sans utiliser les credits du LLM
     # script_text = "{0: 'signes/Poisson_evil.png', 5: 'personne_mystère_peur', 15: 'signes/Poisson.png', 18: 'personne_mystère_positive', 29: 'signes/Poisson_smiling.png', 40: 'personne_angélique', 50: 'signes/Poisson_apeuré.png', 61: 'couples_de_signes', 72: 'signes/Cancer_dark.png', 81: 'personne_démoniaque'}"
     start = script_text.find("{")
     end = script_text.rfind("}") + 1
     script_text = ast.literal_eval(script_text[start:end])
+    print('-------------------------------------------------------------------------------------')
+    print('dict1: ', script_text)
+    print('-------------------------------------------------------------------------------------')
+
     fichiers_supprimes, script_text = remplacer_par_fichier_aleatoire(bibli, fichiers_supprimes, script_text)
     # timestamps_l = [[valeur, time_to_seconds(cle)] for cle, valeur in script_text.items()]
     # dict1 = {time_to_seconds(time_str): video_path for time_str, video_path in script_text.items()}
@@ -430,7 +475,7 @@ def music_suggester(folder):
     """
 
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "Tu es un assistant consciencieux"},
             {"role": "user", "content": prompt}
@@ -499,7 +544,7 @@ Je développe un contenu vidéo avec sous-titres numérotés et un dictionnaire 
 num = num_tokens_from_string("""feedback_l:  [((0, 1), {'': {4864929: 'woman-bookshop-faceless-stack-4864929', 3833491: 'a-heart-shaped-made-from-palm-leaves-for-photo-shots-background-3833491', 5857311: 'pregnant-woman-drinking-coffee-on-the-balcony-5857311'}}), ((0, 1), {'': {4864929: 'woman-bookshop-faceless-stack-4864929', 3833491: 'a-heart-shaped-made-from-palm-leaves-for-photo-shots-background-3833491', 5857311: 'pregnant-woman-drinking-coffee-on-the-balcony-5857311'}}), ((0, 1), {'': {4864929: 'woman-bookshop-faceless-stack-4864929', 3833491: 'a-heart-shaped-made-from-palm-leaves-for-photo-shots-background-3833491', 5857311: 'pregnant-woman-drinking-coffee-on-the-balcony-5857311'}}), ((2, 3), {'': {7280175: 'a-woman-crying-lying-down-on-the-ground-7280175', 7089379: 'a-woman-completing-her-scanning-test-7089379', 6707479: 'two-women-in-meditation-6707479'}}), ((2, 3), {'': {7280175: 'a-woman-crying-lying-down-on-the-ground-7280175', 7089379: 'a-woman-completing-her-scanning-test-7089379', 6707479: 'two-women-in-meditation-6707479'}}), ((2, 3), {'': {7280175: 'a-woman-crying-lying-down-on-the-ground-7280175', 7089379: 'a-woman-completing-her-scanning-test-7089379', 6707479: 'two-women-in-meditation-6707479'}}), ((4, 5), {'': {5728974: 'parents-5728974', 8875677: 'a-person-examining-a-man-s-eyes-8875677'}}), ((4, 5), {'': {5728974: 'parents-5728974', 8875677: 'a-person-examining-a-man-s-eyes-8875677'}}), ((6, 7), {'': {6010760: 'a-young-girl-suffering-from-cancer-6010760', 3779849: 'star-gazers-positioned-themselves-in-a-view-deck-on-a-starry-night-3779849', 3709511: 'a-couple-having-a-misunderstanding-3709511'}}), ((6, 7), {'': {6010760: 'a-young-girl-suffering-from-cancer-6010760', 3779849: 'star-gazers-positioned-themselves-in-a-view-deck-on-a-starry-night-3779849', 3709511: 'a-couple-having-a-misunderstanding-3709511'}}), ((6, 7), {'': {6010760: 'a-young-girl-suffering-from-cancer-6010760', 3779849: 'star-gazers-positioned-themselves-in-a-view-deck-on-a-starry-night-3779849', 3709511: 'a-couple-having-a-misunderstanding-3709511'}}), ((8, 10), {'': {6014527: 'a-woman-using-a-crystal-ball-6014527', 7859983: 'a-female-model-behind-a-glass-7859983', 4034130: 'light-man-sitting-glasses-4034130'}}), ((8, 10), {'': {6014527: 'a-woman-using-a-crystal-ball-6014527', 7859983: 'a-female-model-behind-a-glass-7859983', 4034130: 'light-man-sitting-glasses-4034130'}}), ((8, 10), {'': {6014527: 'a-woman-using-a-crystal-ball-6014527', 7859983: 'a-female-model-behind-a-glass-7859983', 4034130: 'light-man-sitting-glasses-4034130'}}), ((11, 13), {'': {3713693: 'a-man-slapping-and-grabbing-his-face-in-frustration-3713693', 6002038: 'a-young-man-jumping-from-high-places-6002038'}}), ((11, 13), {'': {3713693: 'a-man-slapping-and-grabbing-his-face-in-frustration-3713693', 6002038: 'a-young-man-jumping-from-high-places-6002038'}}), ((14, 15), {'': {3712708: 'a-person-walking-his-fingers-through-the-ray-of-light-3712708'}}), ((16, 17), {'': {4101314: 'man-people-office-emotions-4101314'}}), ((18, 20), {'': {4038499: 'couple-love-table-home-4038499', 4628755: 'a-stingray-underwater-4628755'}}), ((18, 20), {'': {4038499: 'couple-love-table-home-4038499', 4628755: 'a-stingray-underwater-4628755'}}), ((21, 23), {'': {4883894: 'a-man-digging-money-from-the-sand-4883894', 3888268: 'a-woman-model-hairdo-partially-covering-her-face-3888268'}}), ((21, 23), {'': {4883894: 'a-man-digging-money-from-the-sand-4883894', 3888268: 'a-woman-model-hairdo-partially-covering-her-face-3888268'}}), ((24, 26), {'': {6670687: 'video-of-man-with-face-covered-with-words-6670687', 4662088: 'hands-hand-sign-strong-4662088'}}), ((24, 26), {'': {6670687: 'video-of-man-with-face-covered-with-words-6670687', 4662088: 'hands-hand-sign-strong-4662088'}}), ((27, 30), {'': {4772527: 'hands-woman-clinic-doctor-4772527', 3894710: 'fashion-model-posing-black-background-3894710'}}), ((27, 30), {'': {4772527: 'hands-woman-clinic-doctor-4772527', 3894710: 'fashion-model-posing-black-background-3894710'}}), ((31, 34), {'': {7515918: 'a-dog-with-red-sunglasses-7515918'}}), ((35, 36), {'': {5199861: 'woman-in-white-dress-shirt-using-her-ipad-while-writing-5199861'}}), ((37, 39), {'': {3704109: 'a-couple-embracing-each-other-3704109', 7515910: 'a-dog-with-red-sunglasses-7515910'}}), ((37, 39), {'': {3704109: 'a-couple-embracing-each-other-3704109', 7515910: 'a-dog-with-red-sunglasses-7515910'}}), ((40, 41), {'': {3704911: 'a-couple-in-love-sharing-on-a-plated-pancakes-with-melted-chocolate-toppings-3704911', 5135860: 'couple-dancing-on-bed-5135860'}}), ((40, 41), {'': {3704911: 'a-couple-in-love-sharing-on-a-plated-pancakes-with-melted-chocolate-toppings-3704911', 5135860: 'couple-dancing-on-bed-5135860'}}), ((44, 47), {'': {4630687: 'a-couple-discreetly-holding-hands-4630687'}}), ((48, 51), {'': {7189100: 'an-animal-skull-7189100', 5839079: 'person-detected-of-a-virus-5839079'}}), ((48, 51), {'': {7189100: 'an-animal-skull-7189100', 5839079: 'person-detected-of-a-virus-5839079'}}), ((52, 54), {'': {5973873: 'two-persons-doing-fencing-5973873'}}), ((55, 59), {'': {6835570: 'performing-theatrical-woman-6835570'}}), ((60, 61), {'': {6010765: 'a-young-patient-confined-in-the-hospital-6010765', 6388396: 'a-woman-exercising-using-battle-ropes-6388396'}}), ((60, 61), {'': {6010765: 'a-young-patient-confined-in-the-hospital-6010765', 6388396: 'a-woman-exercising-using-battle-ropes-6388396'}}), ((62, 64), {'': {10140476: 'a-woman-wearing-ring-10140476'}}), ((65, 67), {'': {3860469: 'a-filipino-man-recording-a-video-at-a-beach-3860469', 5044272: 'man-portrait-player-male-5044272'}}), ((65, 67), {'': {3860469: 'a-filipino-man-recording-a-video-at-a-beach-3860469', 5044272: 'man-portrait-player-male-5044272'}}), ((68, 70), {'': {18069863: 'an-artist-s-depiction-of-artificial-intelligence-ai-this-video-explores-how-humans-can-creatively-collaborate-with-artificial-general-intelligence-agi-in-the-future-and-how-it-can-off-18069863', 5961111: 'a-woman-explaining-about-work-with-her-coworkers-5961111'}}), ((68, 70), {'': {18069863: 'an-artist-s-depiction-of-artificial-intelligence-ai-this-video-explores-how-humans-can-creatively-collaborate-with-artificial-general-intelligence-agi-in-the-future-and-how-it-can-off-18069863', 5961111: 'a-woman-explaining-about-work-with-her-coworkers-5961111'}}), ((71, 72), {'': {7579339: 'a-doctor-explaining-a-coronavirus-test-result-7579339'}}), ((73, 75), {'': {4770649: 'a-couple-s-feet-on-an-upward-escalator-4770649', 5799410: 'woman-paiting-a-wall-5799410'}}), ((73, 75), {'': {4770649: 'a-couple-s-feet-on-an-upward-escalator-4770649', 5799410: 'woman-paiting-a-wall-5799410'}}), ((80, 82), {'': {3944327: 'food-pizza-hands-friends-3944327', 3761657: 'man-in-blue-shirt-using-virtual-reality-3761657'}}), ((80, 82), {'': {3944327: 'food-pizza-hands-friends-3944327', 3761657: 'man-in-blue-shirt-using-virtual-reality-3761657'}}), ((83, 84), {'': {6943710: 'crystal-gems-on-esoteric-table-6943710', 6691596: 'chinese-new-year-decorations-hanging-on-display-6691596'}}), ((83, 84), {'': {6943710: 'crystal-gems-on-esoteric-table-6943710', 6691596: 'chinese-new-year-decorations-hanging-on-display-6691596'}}), ((85, 86), {'': {12908925: 'hands-of-a-woman-writing-on-a-sticky-note-12908925'}}), ((87, 90), {'': {3831766: 'a-worded-message-stenciled-on-a-board-3831766', 3709163: 'a-woman-copying-from-a-book-3709163'}}), ((87, 90), {'': {3831766: 'a-worded-message-stenciled-on-a-board-3831766', 3709163: 'a-woman-copying-from-a-book-3709163'}}), ((91, 91), {'': {7801554: 'woman-using-laptop-and-smartphone-while-working-7801554'}})]
 """, "cl100k_base")
 
-print(num)
+# print(num)
 # save_settings()
 
 

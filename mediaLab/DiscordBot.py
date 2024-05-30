@@ -116,9 +116,10 @@ def generate_img(driver, prompt, folder):
     u_path = f"//*[@id='{id_pic}']/div[2]/div[1]/div/button[{random.randint(1,4)}]"
     time.sleep(1.5)
     print(u_path)
-    WebDriverWait(driver, 20).until(
+    U_button = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((
-            By.XPATH, u_path))).click()
+            By.XPATH, u_path)))
+    # U_button.click()
     number = 0
     while number < 2:
         number = len(WebDriverWait(driver, 200).until(

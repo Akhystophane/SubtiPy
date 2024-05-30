@@ -117,7 +117,25 @@ def lister_fichiers(dossier):
 
 # questions = [f"La plus grande force des {mbti_type}s" for mbti_type in mbti_types]
 
-titres_videos = ['Le rapprochement de la Lune et Régulus', '19 avril Lune près de Mercure','20 avril, Grand alignement planétaire', 'conjonction Jupiter-Uranus 20 avril', 'conjonction 29 avril, Mars-Neptune ',
-                 'Pleine Lune, 23 avril', 'Pluies de météores en avril 2024', '16 avril, Eclipse partielle']
+titres_videos = [
+    "Por qué se siente tan incomprendido el Aries",
+    "Por qué se siente tan incomprendido el Tauro",
+    "Por qué se siente tan incomprendido el Géminis",
+    "Por qué se siente tan incomprendido el Cáncer",
+    "Por qué se siente tan incomprendido el Leo",
+    "Por qué se siente tan incomprendida la Virgo",
+    "Por qué se siente tan incomprendida la Libra",
+    "Por qué se siente tan incomprendido el Escorpio",
+    "Por qué se siente tan incomprendido el Sagitario",
+    "Por qué se siente tan incomprendido el Capricornio",
+    "Por qué se siente tan incomprendido el Acuario",
+    "Por qué se siente tan incomprendido el Piscis"
+]
+
+
+
+
+
+
 
 create_folders_concept("/Users/emmanuellandau/Documents/EditLab/TODO", titres_videos)

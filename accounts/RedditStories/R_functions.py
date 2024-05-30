@@ -1,11 +1,12 @@
 import json
 import os.path
+import random
 
 from selenium import webdriver
 
 from mediaLab.DiscordBot import load_bot, generate_img, patterned
 from suggesterLab.SuggesterAi import find_path, remplacer_numeros_par_timestamps, get_bibli, get_relevant_signs, \
-    sont_similaires
+    sont_similaires, get_relevant_signsV2
 from suggesterLab.footageSuggester import get_footage_dict, create_dict3, get_midjourney_dict, insert_a_roll, \
     get_footageV2_dict
 from suggesterLab.functions import update_json, extract_dict, get_char, formatter_srt, time_to_seconds
@@ -74,18 +75,63 @@ def filtrer_elements(elements, n_epargnes):
     return elements_filtrés
 
 
-def add_signs_footages(folder, timestamps_l, niche):
+def replace_paths(l1, l2, tolerance=6):
+    # Convertir les clés de l1 en entiers pour faciliter les comparaisons
+    l1_dict = {int(k): v for k, v in l1.items()}
+    updates = []  # Pour enregistrer les mises à jour effectuées
+    # Parcourir chaque élément dans l2
+    for num2_str, path2 in l2:
+        num2 = int(num2_str)
+        # Trouver et remplacer les chemins dans l1 si les numéros sont suffisamment proches
+        for num1 in list(l1_dict.keys()):
+            if 0<= num2 - num1 <= tolerance:
+                updates.append((str(num1), l1_dict[num1], path2))  # Enregistrer l'ancien et le nouveau chemin
+                l1_dict[num1] = path2
+                break
+
+    # Reconstruire l1 avec les chemins mis à jour
+    updated_l1 = {str(num): path for num, path in l1_dict.items()}
+    print("updates : ",updates)
+
+    return updated_l1
+
+
+def add_signs_footages(folder, niche, timestamps_l):
     bibli = get_bibli(niche)
     dico = bibli.copy()
-    signes_astrologiques = []
+    sup_footages = []
+    vrai_elements = []
 
 
-    elements_a_conserver = get_relevant_signs(folder, signes_astrologiques)
+    elements = get_relevant_signsV2(folder)
+    print("elements_a_conserver: ", elements)
 
-    dico['signes'] = [element for element in dico['signes'] if
-                                  any(sont_similaires(sub, element, levenshtein_tolerance=0) for sub in elements_a_conserver)]
+    for couple in elements:
+        elements_a_conserver = [couple[1]]
 
-def do_script_file(folder, fichiers_supprimes, niche, d_id=False, dalee=False, script=False):
+
+        footages_l = [element for element in dico['signes'] if
+                                      any(sont_similaires(sub, element, levenshtein_tolerance=0) for sub in elements_a_conserver) and element not in sup_footages]
+
+        if footages_l:
+            random_footage_name = random.choice(footages_l)
+            couple[1] = find_path(random_footage_name, "astrologenial")
+            sup_footages.append(random_footage_name)
+            if '/' in couple[1]:
+                vrai_elements.append(couple)
+        else:
+            print("plus de footages pour ce signe")
+            # elements.remove(couple)
+    print(vrai_elements)
+
+    timestamps_l = replace_paths(timestamps_l, vrai_elements)
+    print(timestamps_l)
+    return timestamps_l
+
+# add_signs_footages("/Users/emmanuellandau/Documents/EditLab/archive/Es-tu compatible avec un Poisson", "astrologenial", )
+
+
+def do_script_file(folder, fichiers_supprimes, niche, d_id=False, dalee=False, script=False, check_up=False):
     def image_creator(prompts):
         prompts_path = []
 
@@ -129,9 +175,11 @@ def do_script_file(folder, fichiers_supprimes, niche, d_id=False, dalee=False, s
     backup_path = folder + 'backup.json'
     if not os.path.exists(folder + 'backup.json'):
         script_text = get_midjourney_dict(folder)
-
-        # dict2 = get_footage_dict(folder, niche)
-        dict2 = get_footageV2_dict(folder, niche)
+        if niche == "astrologenial":
+            script_text = add_signs_footages(folder, niche, script_text)
+            dict2 = get_footage_dict(folder, niche)
+        else:
+            dict2 = get_footageV2_dict(folder, niche)
 
         timestamps_l = create_dict3(script_text, dict2, interval=3)
         timestamps_l = remplacer_numeros_par_timestamps(timestamps_l, folder + "audio.srt")
@@ -145,6 +193,8 @@ def do_script_file(folder, fichiers_supprimes, niche, d_id=False, dalee=False, s
         print(timestamps_l)
         with open(backup_path, 'w') as fichier:
             fichier.write(json.dumps(timestamps_l, indent=4))
+        if check_up:
+            raise ValueError("Ereeeeeeeeeeut vazy vint petit con")
     else:
         with open(backup_path, 'r') as fichier:
             timestamps_l = json.load(fichier)

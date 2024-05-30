@@ -133,7 +133,8 @@ def feed_back(type_of_videos, id_l, timestamps, feedback_l, duration=0.0):
 
     for tag in tags:
 
-        output = api.search_videos(query= tag, page=num_page, per_page=10)
+        output = api.search_videos(query=tag)
+        # print(output)
         try:
             videos = output["videos"]
         except KeyError:
@@ -157,7 +158,7 @@ def feed_back(type_of_videos, id_l, timestamps, feedback_l, duration=0.0):
         url_video = 'https://www.pexels.com/video/' + str(id) + '/download'  # create the url with the video id
         path = '/Users/emmanuellandau/Documents/mediaLibrary/' + str(id) + '.mp4'
         id_l.append(id)
-        ids.append(id)
+        ids.append({id:name})
         print("id_l : ", id_l)
 
     feedback_l[timestamps] = ids
@@ -265,3 +266,9 @@ def collection_suggester(feedb_dict):
         feedb_dict[timestamps] = footage_path
 
     return feedb_dict
+
+# api = Pexels(API_KEY)
+
+# feed_back(['thoughtful', 'idea'],[], (0,13), {})
+# output = api.search_videos(query='intelligent')
+# print(output)

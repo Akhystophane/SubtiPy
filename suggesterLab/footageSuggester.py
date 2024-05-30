@@ -86,7 +86,7 @@ dict {feedback_l}"""
     # output = response['choices'][0]['message']['content']
     client = OpenAI()
     completion = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
@@ -94,6 +94,7 @@ dict {feedback_l}"""
     )
 
     output = str(completion.choices[0].message.content)
+    print('dict_feedback', output)
 
     start = output.find("{")
     end = output.rfind("}") + 1
@@ -180,7 +181,7 @@ def get_footage_dict(folder, niche):
 
     client = OpenAI()
     completion = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
@@ -191,9 +192,11 @@ def get_footage_dict(folder, niche):
 
     start = script_text.find("{")
     end = script_text.rfind("}") + 1
+
     dict2 = ast.literal_eval(script_text[start:end])
+    print('------dict2------', dict2)
     dict2 = calculate_durations_from_srt(folder, dict2)
-    print(dict2)
+
     return dict2
 
 
@@ -207,7 +210,7 @@ def get_footageV2_dict(folder, niche):
 
     client = OpenAI()
     completion = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
@@ -235,7 +238,7 @@ def get_midjourney_dict(folder):
     Crée un dictionnaire en anglais de 14 clés maximums distribué uniformément où chaque clé correspond au numéro de sous-titre du début d'une phrase entière dans le script : {{
   "num_srt de la phrase 1": independant description of an image, 
   "num_srt de la phrase 2": ...
-}}. La clé 0 doit être incluse pour la première phrase. Pour chaque phrase fournie, créez un prompt destiné à générer une image en lien avec cette phrase de manière autonome (rien d'abstrait, situations concrete avec description uniquement physique des perso, objets... Chaque prompt doit être conçu de façon à ce que l'image puisse être générée. Il est crucial de décrire en détail personnages, objets, et environnement pour l'IA générative d'images. Les descriptions doivent être factuelles et centrées sur le contenu immédiat de la phrase (tu n'inclues pas la phrase du txt dans le prompt), sans faire allusion à un contexte plus large. Les prompts doivent respecter la classification PG-13, etre clairs et sans mots ou expressions sensuels. Chaque prompt est direct, indépendant et doit se suffir pour réaliser l'illustration. Assure-toi que les guillemets dans les valeurs soient échappés. Le résultat final doit être un dictionnaire formaté pour une utilisation informatique, avec une seule entrée par phrase complète. Ta réponse doit être uniquement le dictionnaire formaté correctement pour un usage direct dans un programme informatique. Voici le texte :{txt}.
+}}. La clé 0 doit être incluse pour la première phrase. Pour chaque phrase fournie, créez un prompt destiné à générer une image en lien avec cette phrase de manière autonome (rien d'abstrait, situations concrete avec description uniquement physique des perso, objets... Chaque prompt doit être conçu de façon à ce que l'image puisse être générée. Il est crucial de décrire en détail l'environnement et l'atmosphère de l'image pour l'IA générative d'images. Les descriptions doivent être factuelles et centrées sur le contenu immédiat de la phrase (tu n'inclues pas la phrase du txt dans le prompt), sans faire allusion à un contexte plus large. Les prompts doivent respecter la classification PG-13, etre clairs et sans mots ou expressions sensuels. Chaque prompt est direct, indépendant et doit se suffir pour réaliser l'illustration. Assure-toi que les guillemets dans les valeurs soient échappés. Le résultat final doit être un dictionnaire formaté pour une utilisation informatique, avec une seule entrée par phrase complète. Ta réponse doit être uniquement le dictionnaire formaté correctement pour un usage direct dans un programme informatique. Voici le texte :{txt}.
 
     """
     # prompt = prompt.replace("{text}", str(txt))
@@ -253,7 +256,7 @@ def get_midjourney_dict(folder):
     client = OpenAI()
 
     completion = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}

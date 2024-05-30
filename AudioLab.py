@@ -92,7 +92,7 @@ def dump_srt(folder, max_words=2):
   model = stable_whisper.load_model('large-v3')
   # result = model.align(audio_path, txt)
   # initial_prompt="signes astrologiques : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons"
-  result = model.transcribe(audio_path, fp16=False, prompt="signes astrologiques : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons, j'aime, like")
+  result = model.transcribe(audio_path, fp16=False, prompt="bien orthographier: Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons, j'aime, like")
   print(result)
   result = (
       result
@@ -114,12 +114,12 @@ from moviepy.editor import *
 from pydub import AudioSegment
 
 # Load your M4A file
-# m4a_audio = AudioSegment.from_file("/Users/emmanuellandau/Documents/EditLab/TODO/entretiens/Cyrille mazure.m4a", format="m4a")
+# m4a_audio = AudioSegment.from_file("/Users/emmanuellandau/Documents/EditLab/TODO/test/audio.m4a", format="m4a")
 
 # Convert to MP3
-# m4a_audio.export("/Users/emmanuellandau/Documents/EditLab/TODO/entretiens/audio.mp3", format="mp3")
+# m4a_audio.export("/Users/emmanuellandau/Documents/EditLab/TODO/test/audio.mp3", format="mp3")
 import whisper
-mp3_path = "/Users/emmanuellandau/Downloads/marketing_interview.mp3"
+# mp3_path = "/Users/emmanuellandau/Documents/EditLab/TODO/test/audio.mp3"
 # text_path = "/Users/emmanuellandau/Downloads/marketing_interview_txt.mp3"
 # video = VideoFileClip("/Users/emmanuellandau/Downloads/Download (1).mp4")
 # audio = video.audio
@@ -132,4 +132,4 @@ mp3_path = "/Users/emmanuellandau/Downloads/marketing_interview.mp3"
 # model.transcribe(mp3_path, fp16=False)
 # result = model.transcribe(mp3_path)
 # result.to_srt_vtt(text_path, segment_level=True, word_level=False)
-# dump_srt("/Users/emmanuellandau/Documents/movieLib/You/edit1")
+# dump_srt("/Users/emmanuellandau/Documents/EditLab/TODO/test")
