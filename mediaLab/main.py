@@ -125,6 +125,47 @@ def download_video(type_of_videos, id_l, vertical=True, duration=0.0, pic=False)
             # return path, id_l  # download the picture
     return None, id_l
 
+
+import requests
+
+
+def search_videos(api_key, tag):
+    # URL de base pour la recherche de vidéos sur Pexels
+    url = f"https://api.pexels.com/videos/search?query={tag}"
+
+    # En-têtes de la requête avec la clé API pour l'autorisation et un User-Agent similaire à curl
+    headers = {
+        'Authorization': api_key,
+        'User-Agent': 'curl/7.64.1',  # Utiliser un User-Agent similaire à curl
+    }
+
+    try:
+        # Envoyer une requête GET à l'API Pexels
+        response = requests.get(url, headers=headers)
+
+        # Vérifier le code de statut HTTP
+        if response.status_code == 200:
+            # Convertir la réponse en JSON et la retourner
+            return response.json()
+        else:
+            # Afficher un message d'erreur si le code de statut n'est pas 200
+            print(f"Erreur HTTP {response.status_code}: {response.text}")
+            return None
+    except requests.exceptions.RequestException as e:
+        # Gérer les exceptions de requête
+        print(f"Erreur de requête: {e}")
+        return None
+
+
+# Exemple d'utilisation de la fonction
+api_key = "0UtWYfv1TiXjERUIbSxB4KLQAYQr1AnlMg2Jjrj4oDDB7ytX90BdKJ3l"  # Remplace par ta clé API
+tag = "thoughtful"
+videos = search_videos(api_key, tag)
+
+if videos:
+    print("Résultats de la recherche :", videos)
+
+
 def feed_back(type_of_videos, id_l, timestamps, feedback_l, duration=0.0):
     tags = type_of_videos
     api = Pexels(API_KEY)
@@ -132,9 +173,12 @@ def feed_back(type_of_videos, id_l, timestamps, feedback_l, duration=0.0):
     ids = []
 
     for tag in tags:
+        print('tag', tag)
 
-        output = api.search_videos(query=tag)
-        # print(output)
+        # output = api.search_videos(query=tag)
+        output = search_videos('0UtWYfv1TiXjERUIbSxB4KLQAYQr1AnlMg2Jjrj4oDDB7ytX90BdKJ3l', tag)
+        print(output)
+
         try:
             videos = output["videos"]
         except KeyError:

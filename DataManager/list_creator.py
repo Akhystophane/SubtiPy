@@ -5,7 +5,7 @@ signes_astrologiques = [
 ]
 
 phrases = [
-    f"Tomber amoureux d'un {signe} "
+    f" Voici pourquoi ne jamais énerver  un {signe} "
     for signe in signes_astrologiques
 ]
 

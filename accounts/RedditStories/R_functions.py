@@ -3,6 +3,9 @@ import os.path
 import random
 
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 
 from mediaLab.DiscordBot import load_bot, generate_img, patterned
 from suggesterLab.SuggesterAi import find_path, remplacer_numeros_par_timestamps, get_bibli, get_relevant_signs, \
@@ -134,16 +137,27 @@ def add_signs_footages(folder, niche, timestamps_l):
 def do_script_file(folder, fichiers_supprimes, niche, d_id=False, dalee=False, script=False, check_up=False):
     def image_creator(prompts):
         prompts_path = []
+        first = True
+        profile_path = "/Users/emmanuellandau/Library/Application Support/Google/Chrome/Profile 1"
+
 
         if not dalee:
-            driver = webdriver.Chrome()
+            chrome_options = Options()
+            chrome_options.add_argument("--disable-notifications")
+            chrome_options.add_argument("--disable-popup-blocking")
+            chrome_options.add_argument(f"user-data-dir={profile_path}")
+            driver = webdriver.Chrome( options=chrome_options)
+
+            # driver = webdriver.Chrome()
             load_bot(driver)
         for prompt in prompts:
+
             if not dalee:
                 if os.path.exists(f'/Users/emmanuellandau/Documents/MidjourneyBibli/{patterned(prompt)}.png'):
                     path = f'/Users/emmanuellandau/Documents/MidjourneyBibli/{patterned(prompt)}.png'
                 else:
-                    path = generate_img(driver, prompt, folder)
+                    path = generate_img(driver, prompt, first)
+                    first = False
             else:
                 client = OpenAI()
                 print(prompt)

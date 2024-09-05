@@ -82,8 +82,7 @@ def dump_srt(folder, max_words=2):
   srt_path = os.path.join(folder, "audio.srt")
   audio_path = os.path.join(folder, "audio.mp3")
   txt_path = os.path.join(folder, "description.txt")
-  txt = """
-  Trois femmes sont mortes et se sont retrouvées devant les portes du paradis. Saint-Pierre a dit à la première femme : "Combien d'hommes as-tu fréquenté au cours de ta vie ?" La première femme a répondu : "Je n'ai dormi qu'avec un seul homme, mon mari, et je n'ai pas couché avec lui avant notre mariage." Saint-Pierre s'est tourné vers l'ange à côté de lui et a dit : "Donne-lui la clé de la chambre en argent." L'ange a donné à la femme une clé en argent et la femme est entrée au paradis avec la clé. Ensuite, Saint-Pierre a dit à la deuxième femme : "Combien d'hommes as-tu fréquenté au cours de ta vie ?" J'ai été vierge toute ma vie car j'étais une nonne et j'ai consacré ma vie à Dieu. Saint-Pierre s'est tourné vers l'ange et a dit : "Donne-lui la clé de la chambre en or." L'ange a donné à la femme une clé en or et la femme est entrée au paradis avec la clé. Enfin, Saint-Pierre a dit à la troisième femme : "Combien d'hommes as-tu fréquenté au cours de ta vie ?" J'ai couché avec 13 hommes avant de commencer à sortir avec mon mari, 35 hommes pendant que nous sortions ensemble, 49 hommes pendant que nous étions fiancés, 56 hommes pendant que nous étions mariés, et 28 hommes après sa mort. Saint-Pierre s'est tourné vers l'ange et a dit : "Donne-lui la clé de ma chambre."""
+
   if os.path.exists(srt_path):
     print("there")
     return True

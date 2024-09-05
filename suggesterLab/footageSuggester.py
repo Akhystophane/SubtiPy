@@ -229,30 +229,22 @@ def get_footageV2_dict(folder, niche):
     return dict2
 
 # get_footageV2_dict("/Users/emmanuellandau/Documents/EditLab/TODO/3/", "reddit_stories")
-def get_midjourney_dict(folder):
 
-    with open(folder + "audio.srt", 'r', encoding='utf-8') as file:
-        txt = formatter_srtV2(file.read(), saut=0)
-
-    prompt = f"""
+def get_midjourney_dict(folder, prompt=f"""
     Crée un dictionnaire en anglais de 14 clés maximums distribué uniformément où chaque clé correspond au numéro de sous-titre du début d'une phrase entière dans le script : {{
   "num_srt de la phrase 1": independant description of an image, 
   "num_srt de la phrase 2": ...
-}}. La clé 0 doit être incluse pour la première phrase. Pour chaque phrase fournie, créez un prompt destiné à générer une image en lien avec cette phrase de manière autonome (rien d'abstrait, situations concrete avec description uniquement physique des perso, objets... Chaque prompt doit être conçu de façon à ce que l'image puisse être générée. Il est crucial de décrire en détail l'environnement et l'atmosphère de l'image pour l'IA générative d'images. Les descriptions doivent être factuelles et centrées sur le contenu immédiat de la phrase (tu n'inclues pas la phrase du txt dans le prompt), sans faire allusion à un contexte plus large. Les prompts doivent respecter la classification PG-13, etre clairs et sans mots ou expressions sensuels. Chaque prompt est direct, indépendant et doit se suffir pour réaliser l'illustration. Assure-toi que les guillemets dans les valeurs soient échappés. Le résultat final doit être un dictionnaire formaté pour une utilisation informatique, avec une seule entrée par phrase complète. Ta réponse doit être uniquement le dictionnaire formaté correctement pour un usage direct dans un programme informatique. Voici le texte :{txt}.
+}}. La clé 0 doit être incluse pour la première phrase. Pour chaque phrase fournie, créez un prompt destiné à générer une image en lien avec cette phrase de manière autonome (rien d'abstrait, situations concrete avec description uniquement physique des perso, objets... Chaque prompt doit être conçu de façon à ce que l'image puisse être générée. Il est crucial de décrire en détail l'environnement et l'atmosphère de l'image pour l'IA générative d'images. Les descriptions doivent être factuelles et centrées sur le contenu immédiat de la phrase (tu n'inclues pas la phrase du txt dans le prompt), sans faire allusion à un contexte plus large. Les prompts doivent respecter la classification PG-13, etre clairs et sans mots ou expressions sensuels. Chaque prompt est direct, indépendant et doit se suffir pour réaliser l'illustration. Assure-toi que les guillemets dans les valeurs soient échappés. Le résultat final doit être un dictionnaire formaté pour une utilisation informatique, avec une seule entrée par phrase complète. Ta réponse doit être uniquement le dictionnaire formaté correctement pour un usage direct dans un programme informatique. Voici le texte : .
 
-    """
-    # prompt = prompt.replace("{text}", str(txt))
+    """):
+    if os.path.exists(folder + "audio.srt"):
+        with open(folder + "audio.srt", 'r', encoding='utf-8') as file:
+            txt = formatter_srtV2(file.read(), saut=0)
+        prompt = prompt+txt
+
+
+
     print(prompt)
-    # response = openai.ChatCompletion.create(
-    #     model="gpt-4",
-    #     messages=[
-    #         {"role": "system", "content": "Tu es un assistant"},
-    #         {"role": "user", "content": prompt}
-    #     ]
-    # )
-    # print(response['choices'][0]['message']['content'])
-    #
-    # script_text = response['choices'][0]['message']['content']
     client = OpenAI()
 
     completion = client.chat.completions.create(
@@ -270,6 +262,25 @@ def get_midjourney_dict(folder):
     dict_img = ast.literal_eval(script_text[start:end])
 
     return dict_img
+
+def get_descri(prompt):
+
+    print(prompt)
+    client = OpenAI()
+
+    completion = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    script_text = str(completion.choices[0].message.content)
+    script_text = script_text.replace("*", "")
+    print(script_text)
+
+    return script_text
 
 # get_footage_dict("/Users/emmanuellandau/Documents/EditLab/TODO/6 qualités des Cancers que personne ne remarque/", "reddit_stories")
 
