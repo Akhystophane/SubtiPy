@@ -76,7 +76,7 @@ def download_video(type_of_videos, id_l, vertical=True, duration=0.0, pic=False)
         url = filtered_videos[idx]["url"]
         parts = url.split("/")
         name = parts[-2]
-        url_video = 'https://www.pexels.com/video/' + str(id) + '/download'  # create the url with the video id
+        url_video = f"https://www.pexels.com/download/video/{str(id)}/"  # create the url with the video id
         path = '/Users/emmanuellandau/Documents/mediaLibrary/' + str(id) + '.mp4'
 
         if not check_file_exists(bibli_path, str(id)) and id not in id_l:
@@ -157,13 +157,7 @@ def search_videos(api_key, tag):
         return None
 
 
-# Exemple d'utilisation de la fonction
-api_key = "0UtWYfv1TiXjERUIbSxB4KLQAYQr1AnlMg2Jjrj4oDDB7ytX90BdKJ3l"  # Remplace par ta clé API
-tag = "thoughtful"
-videos = search_videos(api_key, tag)
 
-if videos:
-    print("Résultats de la recherche :", videos)
 
 
 def feed_back(type_of_videos, id_l, timestamps, feedback_l, duration=0.0):
@@ -199,7 +193,7 @@ def feed_back(type_of_videos, id_l, timestamps, feedback_l, duration=0.0):
         url = filtered_videos[idx]["url"]
         parts = url.split("/")
         name = parts[-2]
-        url_video = 'https://www.pexels.com/video/' + str(id) + '/download'  # create the url with the video id
+        url_video = f"https://www.pexels.com/download/video/{str(id)}/"  # create the url with the video id
         path = '/Users/emmanuellandau/Documents/mediaLibrary/' + str(id) + '.mp4'
         id_l.append(id)
         ids.append({id:name})
@@ -212,7 +206,7 @@ def feed_back(type_of_videos, id_l, timestamps, feedback_l, duration=0.0):
 def feedb_download(feedb_dict):
     bibli_path = "/Users/emmanuellandau/Documents/mediaLibrary"
     for timestamps, id in feedb_dict.items():
-        url_video = 'https://www.pexels.com/video/' + str(id) + '/download'  # create the url with the video id
+        url_video = f"https://www.pexels.com/download/video/{str(id)}/"  # create the url with the video id
         path = '/Users/emmanuellandau/Documents/mediaLibrary/' + str(id) + '.mp4'
         if not check_file_exists(bibli_path, str(id)):
             r = requests.get(url_video)
@@ -273,7 +267,7 @@ def download_collections():
         for i in range(len(collection)):
             id = filtered_videos[i]["id"]
             print(id)
-            download_url = 'https://www.pexels.com/video/' + str(id) + '/download'
+            download_url = f"https://www.pexels.com/download/video/{str(id)}/"
             local_path = '/Users/emmanuellandau/PycharmProjects/SubtiPy/mediaLab/bibli/' + str(id) + '.mp4'
             if not check_file_exists(bibli_path, str(id)):
                 r = requests.get(download_url, headers=headers)
@@ -316,3 +310,93 @@ def collection_suggester(feedb_dict):
 # feed_back(['thoughtful', 'idea'],[], (0,13), {})
 # output = api.search_videos(query='intelligent')
 # print(output)
+
+
+# Exemple d'utilisation de la fonction
+# api_key = "0UtWYfv1TiXjERUIbSxB4KLQAYQr1AnlMg2Jjrj4oDDB7ytX90BdKJ3l"  # Remplace par ta clé API
+# tag = "thoughtful"
+# videos = search_videos(api_key, tag)
+#
+# if videos:
+#     print("Résultats de la recherche :", videos)
+
+# id = 28571261
+# headers = {
+#         'Authorization': API_KEY
+#     }
+# url = f"https://www.pexels.com/download/video/{str(id)}/"
+
+# # Envoyer une requête GET à l'API Pexels
+# response = requests.get(url, headers=headers)
+#
+# # Vérifier le code de statut HTTP
+# if response.status_code == 200:
+#     # Convertir la réponse en JSON et la retourner
+#     print(response.content)
+# else:
+#     # Afficher un message d'erreur si le code de statut n'est pas 200
+#     print(f"Erreur HTTP {response.status_code}: {response.text}")
+#     print(None)
+
+
+import os
+import requests
+
+
+
+# Fonction pour télécharger les vidéos à partir de feedb_dict
+def feedb_download_(feedb_dict):
+    bibli_path = "/Users/emmanuellandau/Documents/mediaLibrary"
+    for id in feedb_dict:
+        url_video = f"https://www.pexels.com/download/video/{str(id)}/"  # créer l'URL avec l'ID vidéo
+        path = os.path.join(bibli_path, str(id) + '.mp4')
+        r = requests.get(url_video)
+        # Écraser toujours le fichier existant
+        with open(path, 'wb') as outfile:
+            outfile.write(r.content)
+        print(f"Vidéo {id} téléchargée à {path}")
+
+# Fonction pour récupérer les noms de dossiers dans un répertoire
+def get_files_added_yesterday(directory):
+    # Obtenir la date et l'heure d'hier
+
+    from datetime import timedelta
+    from datetime import datetime
+    yesterday = datetime.now() - timedelta(days=1)
+    # Convertir la date d'hier à minuit pour comparaison
+    yesterday_start = datetime(yesterday.year, yesterday.month, yesterday.day)
+
+    # Liste pour stocker les fichiers ajoutés hier
+    files_added_yesterday = []
+
+    # Parcourir les fichiers dans le répertoire
+    for file_name in os.listdir(directory):
+        file_path = os.path.join(directory, file_name)
+
+        # Vérifier si c'est un fichier (pas un dossier)
+        if os.path.isfile(file_path):
+            # Obtenir la date de modification du fichier
+            file_mod_time = os.path.getmtime(file_path)
+            file_mod_datetime = datetime.fromtimestamp(file_mod_time)
+
+            # Vérifier si le fichier a été modifié hier
+            if file_mod_datetime >= yesterday_start and file_mod_datetime < yesterday_start + timedelta(days=1):
+                files_added_yesterday.append(file_name)
+
+    return files_added_yesterday
+
+# # Chemin du répertoire où récupérer les dossiers
+# media_library_path = "/Users/emmanuellandau/Documents/mediaLibrary"
+#
+# # Récupérer les noms des dossiers
+# folder_names = get_files_added_yesterday(media_library_path)
+# l = []
+# for folder_name in folder_names:
+#     folder_name.replace('.mp4', '')
+#     l.append(folder_name.replace('.mp4', ''))
+#
+#
+# # print(l)
+# #
+# # # Appel de la fonction de téléchargement
+# feedb_download_(l)

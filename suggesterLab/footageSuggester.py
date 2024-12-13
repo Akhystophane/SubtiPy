@@ -271,7 +271,7 @@ def get_descri(prompt):
     completion = client.chat.completions.create(
         model="gpt-4o",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "system", "content": "Tu es un astrologue storyteller."},
             {"role": "user", "content": prompt}
         ]
     )

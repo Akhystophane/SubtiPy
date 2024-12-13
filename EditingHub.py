@@ -118,9 +118,9 @@ def get_done(Lab_path, file="/Users/emmanuellandau/Scripts_Adobe/aE-test.jsx"):
         # break
     return True
 #
-# get_ready("/Users/emmanuellandau/Documents/EditLab", "astrologenial", check_condition=False, break_after_first=False, multilingual=True)
+# get_ready("/Users/emmanuellandau/Documents/EditLab", "astrologenial", check_condition=False, break_after_first=True, multilingual=False)
 
-get_done("/Users/emmanuellandau/Documents/EditLab")
+# get_done("/Users/emmanuellandau/Documents/EditLab")
 
 
 

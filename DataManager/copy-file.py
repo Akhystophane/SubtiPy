@@ -92,17 +92,18 @@ def create_folders_concept(dossier_parent, phrases):
 
     # Créer un dossier et ajouter un fichier "description" pour chaque phrase
     for phrase in phrases:
-        prompt = f"""realise moi un script dynamique qui prend le viewer aux tripes ( un bloc, un seul paragraphe) de
-         350 mots avec suspens sur titre : {phrase}? La première phrase est le titre pour impacter, Puis juste après,
+        txt = ""
+        prompt = f"""realise moi un script dynamique, fluide et mystérieux ( un bloc, un seul paragraphe) de
+         350 mots avec suspens sur titre : {phrase}!  La première phrase est le titre pour impacter, Puis juste après,
           dans la deuxième phrase tu dois  demander de mettre leur date de naissance en commentaire pour trouver leur
-           jumeau astrologique en commentaire et qu'un cadeau astro l'attend dans ma bio (ici tu le tutoies). tu peux
-            parler au masculin neutre, tu dois avoir un ton hyperbolique. Note importante, s'il y a des chiffres dans
+           jumeau astrologique en commentaire (ici tu le tutoies). tu peux
+            parler au masculin neutre, tu dois avoir un ton chaleureux. Donne le ou les signes astro compatibles et argumentes. Note importante, s'il y a des chiffres dans
              ta réponse, écrit les en lettres et évite les tirets longs. A la fin de la vidéo en une phrase, tu  demande
               de commenter, partager et republier si j'ai vu juste. Attention ta réponse contient UNIQUEMENT le paragraphe sans
 texte introductif ou parasite."""
         dossier = os.path.join(dossier_parent, phrase)
         description_fichier = os.path.join(dossier, "description.txt")
-        txt = get_descri(prompt)
+        #txt = get_descri(prompt)
         os.mkdir(dossier)
         with open(description_fichier, "w") as file:
             file.write(txt)
@@ -127,12 +128,19 @@ def lister_fichiers(dossier):
 
 # questions = [f"La plus grande force des {mbti_type}s" for mbti_type in mbti_types]
 
-titres_videos =  [' Voici pourquoi ne jamais énerver  un Bélier ', ' Voici pourquoi ne jamais énerver  un Taureau ',
-                  ' Voici pourquoi ne jamais énerver  un Gémeaux ', ' Voici pourquoi ne jamais énerver  un Cancer ',
-                  ' Voici pourquoi ne jamais énerver  un Lion ', ' Voici pourquoi ne jamais énerver  une Vierge ',
-                  ' Voici pourquoi ne jamais énerver  une Balance ', ' Voici pourquoi ne jamais énerver  un Scorpion ',
-                  ' Voici pourquoi ne jamais énerver  un Sagittaire ', ' Voici pourquoi ne jamais énerver  un Capricorne ',
-                  ' Voici pourquoi ne jamais énerver  un Verseau ', ' Voici pourquoi ne jamais énerver  un Poisson ']
+titres_videos =  [
+    "Le problème du scorpion",
+    "Le problème du signe vierge",
+    "Les béliers sont différents",
+    "Si les signes étaient des anges",
+    "Si les signes étaient des démons",
+    "Il y a un signe astro qui"
+]
+
+
+
+
+
 
 
 

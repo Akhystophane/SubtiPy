@@ -134,12 +134,11 @@ def add_signs_footages(folder, niche, timestamps_l):
 # add_signs_footages("/Users/emmanuellandau/Documents/EditLab/archive/Es-tu compatible avec un Poisson", "astrologenial", )
 
 
-def do_script_file(folder, fichiers_supprimes, niche, d_id=False, dalee=False, script=False, check_up=False):
+def do_script_file(folder, fichiers_supprimes, niche, aspect_ratio, d_id=False, dalee=False, script=False, check_up=False):
     def image_creator(prompts):
         prompts_path = []
         first = True
         profile_path = "/Users/emmanuellandau/Library/Application Support/Google/Chrome/Profile 1"
-
 
         if not dalee:
             chrome_options = Options()
@@ -151,12 +150,14 @@ def do_script_file(folder, fichiers_supprimes, niche, d_id=False, dalee=False, s
             # driver = webdriver.Chrome()
             load_bot(driver)
         for prompt in prompts:
+            prompt = prompt.replace(",","").lower()
+            prompt = prompt.replace(".", "").lower()
 
             if not dalee:
                 if os.path.exists(f'/Users/emmanuellandau/Documents/MidjourneyBibli/{patterned(prompt)}.png'):
                     path = f'/Users/emmanuellandau/Documents/MidjourneyBibli/{patterned(prompt)}.png'
                 else:
-                    path = generate_img(driver, prompt, first)
+                    path = generate_img(driver, prompt, first, aspect_ratio=aspect_ratio)
                     first = False
             else:
                 client = OpenAI()
@@ -208,7 +209,7 @@ def do_script_file(folder, fichiers_supprimes, niche, d_id=False, dalee=False, s
         with open(backup_path, 'w') as fichier:
             fichier.write(json.dumps(timestamps_l, indent=4))
         if check_up:
-            raise ValueError("Ereeeeeeeeeeut vazy vint petit con")
+            raise ValueError("Ereeeeeeeeeeur vazy vint petit con")
     else:
         with open(backup_path, 'r') as fichier:
             timestamps_l = json.load(fichier)

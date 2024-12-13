@@ -1,6 +1,8 @@
 import json
 import os
-
+import whisper
+from moviepy.editor import *
+from pydub import AudioSegment
 import pipeline as pipeline
 from elevenlabs import set_api_key, save
 from elevenlabs import voices, generate, play
@@ -26,7 +28,9 @@ def make_voice(dossier_principal):
     # Recherche du fichier "description.txt"
     if "description.txt" in fichiers:
       if not 'audio.mp3' in fichiers:
-        male = "G7xH3hmwHsuqBz5TIhkC"
+        male_radio = "1ns94GwK9YDCJoL6Nglv"
+        male_origin = 'G7xH3hmwHsuqBz5TIhkC'
+        male = "Hbb2NXaf6CKJnlEHYM1D"
         female = "8IBKhZKqVZolbCCcNSPI"
         chemin_description = os.path.join(dossier, "description.txt")
         with open(chemin_description, 'r', encoding='utf8') as txt_file:
@@ -34,8 +38,8 @@ def make_voice(dossier_principal):
         print(txt_content)
         audio = generate(
           text=txt_content,
-          voice= male,
-          model="eleven_multilingual_v1"
+          voice= male_origin,
+          model="eleven_multilingual_v2"
         )
 
         # Construction du chemin du fichier audio
@@ -75,7 +79,8 @@ from transformers import pipeline
 #             srtFile.write(segment)
 #
 #     return srtFilename
-import faster_whisper
+
+
 import stable_whisper
 def dump_srt(folder, max_words=2):
 
@@ -103,21 +108,66 @@ def dump_srt(folder, max_words=2):
   result.to_srt_vtt(srt_path, segment_level=True, word_level=False)
   return True
 
+def process_videos_and_transcribe(input_folder, output_folder, model_size="large-v3"):
+    """
+    Process all MP4 files in a directory, extract audio as MP3, and transcribe using Whisper.
 
-# folder = "/Users/emmanuellandau/Documents/EditLab/TODO/conseil"
+    Args:
+        input_folder (str): Path to the folder containing MP4 files.
+        output_folder (str): Path to the folder where MP3 and transcription files will be saved.
+        model_size (str): Whisper model size to use (default: "medium").
+    """
+    # Ensure output directory exists
+    os.makedirs(output_folder, exist_ok=True)
 
+    # Load the Whisper model
+    model = whisper.load_model(model_size)
+
+    # Loop through all MP4 files in the directory
+    for file_name in os.listdir(input_folder):
+      if file_name.lower().endswith(".mp4"):
+        video_path = os.path.join(input_folder, file_name)
+        base_name = os.path.splitext(file_name)[0]
+        mp3_path = os.path.join(output_folder, f"{base_name}.mp3")
+        transcription_path = os.path.join(output_folder, f"{base_name}.srt")
+
+        try:
+          # Extract audio from video
+          print(f"Processing video: {video_path}")
+          video = VideoFileClip(video_path)
+          audio = video.audio
+          audio.write_audiofile(mp3_path)
+          audio.close()
+
+          # Convert to MP3 (if needed)
+          mp3_audio = AudioSegment.from_file(mp3_path, format="mp3")
+          mp3_audio.export(mp3_path, format="mp3")
+          print(f"Audio saved to: {mp3_path}")
+
+          # Transcribe using Whisper
+          print(f"Transcribing audio: {mp3_path}")
+          result = model.transcribe(mp3_path, fp16=False)
+          with open(transcription_path, "w") as f:
+            f.write(result["text"])
+          print(f"Transcription saved to: {transcription_path}")
+        except Exception as e:
+          print(f"Error processing {file_name}: {e}")
+
+
+# process_videos_and_transcribe("/Users/emmanuellandau/Documents/EditLab/TODO/retranscription", "/Users/emmanuellandau/Documents/EditLab/TODO/retranscription")
+
+# folder = "/Users/emmanuellandau/Documents/EditLab/TODO/retranscription"
+# dump_srt(folder)
 # transcribe_audio()
-make_voice(dossier_principal)
+#make_voice(dossier_principal)
 # dump_                                                                                                                                                                                                                                       srt(folder)
-from moviepy.editor import *
-from pydub import AudioSegment
+
 
 # Load your M4A file
 # m4a_audio = AudioSegment.from_file("/Users/emmanuellandau/Documents/EditLab/TODO/test/audio.m4a", format="m4a")
 
 # Convert to MP3
 # m4a_audio.export("/Users/emmanuellandau/Documents/EditLab/TODO/test/audio.mp3", format="mp3")
-import whisper
 # mp3_path = "/Users/emmanuellandau/Documents/EditLab/TODO/test/audio.mp3"
 # text_path = "/Users/emmanuellandau/Downloads/marketing_interview_txt.mp3"
 # video = VideoFileClip("/Users/emmanuellandau/Downloads/Download (1).mp4")

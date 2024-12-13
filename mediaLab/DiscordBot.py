@@ -1,5 +1,7 @@
 import random
 import re
+import unicodedata
+
 import time
 import urllib
 
@@ -49,20 +51,30 @@ def load_cookie(driver, path):
         except Exception as e:
             print(e)
 
-def patterned(prompt):
-    # Suppression de la ponctuation sauf les tirets
-    prompt_without_punctuation = re.sub(r'[^\w\s-]', '', prompt)
+def patterned(prompt: str) -> str:
+    # 1. Normalisation Unicode pour enlever les accents
+    prompt_normalized = unicodedata.normalize('NFD', prompt)
+    prompt_without_accents = ''.join(
+        char for char in prompt_normalized if unicodedata.category(char) != 'Mn'
+    )
 
-    # Remplacement des espaces par des underscores et passage en minuscules
-    prompt_cleaned = prompt_without_punctuation.replace(" ", "_")
+    # 2. Suppression de la ponctuation sauf les tirets
+    prompt_without_punctuation = re.sub(r'[^\w\s-]', '', prompt_without_accents)
 
-    # Troncature de la chaîne à 40 caractères maximum
+    # 3. Remplacement des espaces par des underscores et passage en minuscules,
+    # mais en préservant la première lettre majuscule si elle existe
+    if prompt_without_punctuation:
+        first_char = prompt_without_punctuation[0]
+        remaining = prompt_without_punctuation[1:].replace(" ", "_").lower()
+        prompt_cleaned = first_char + remaining
+    else:
+        prompt_cleaned = ""
+
+    # 4. Troncature de la chaîne à 40 caractères maximum
     if len(prompt_cleaned) > 40:
-        # Coupe la chaîne pour ne pas dépasser 40 caractères
-        # Et s'assure de ne pas couper en plein milieu d'un mot.
         words = prompt_cleaned[:40].split('_')
 
-        # Si le dernier mot est tronqué, on l'ignore
+        # Si le dernier mot est incomplet, on l'ignore
         if len(words[-1]) < len(prompt_cleaned) - prompt_cleaned.rfind('_'):
             words.pop()
 
@@ -92,7 +104,7 @@ def load_bot(driver):
 
 
 
-def generate_img(driver, prompt, first):
+def generate_img(driver, prompt, first, aspect_ratio):
     txt_box = WebDriverWait(driver, 50).until(
         EC.element_to_be_clickable((By.XPATH, "//div[@role='textbox']"))
     )
@@ -104,7 +116,7 @@ def generate_img(driver, prompt, first):
     WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.XPATH, "//*[@id='autocomplete-0']"))).click() #imagine button
 
-    txt_box.send_keys(f'{prompt} --ar 9:16')
+    txt_box.send_keys(f'{prompt} --ar {aspect_ratio}')
     txt_box.send_keys(Keys.ENTER)
 
     pattern = patterned(prompt)

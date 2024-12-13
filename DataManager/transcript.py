@@ -27,8 +27,8 @@ def extract_text_from_srt(srt_file_path, output_txt_path):
         return f"An error occurred: {e}"
 
 # Example usage
-srt_file_path = '/Users/emmanuellandau/Documents/EditLab/TODO/test/audio.srt'  # Replace with the path to your SRT file
-output_txt_path = '/Users/emmanuellandau/Documents/EditLab/TODO/test/trasncript.txt'  # Replace with your desired output path
+srt_file_path = '/Users/emmanuellandau/Documents/EditLab/TODO/retranscription/audio.srt'  # Replace with the path to your SRT file
+output_txt_path = '/Users/emmanuellandau/Documents/EditLab/TODO/retranscription/trasncript.txt'  # Replace with your desired output path
 
 # Note: This is an example. The paths need to be replaced with actual file paths.
 extract_text_from_srt(srt_file_path, output_txt_path)

@@ -195,4 +195,4 @@ end_subtitle_number = 19  # Replace with your actual end subtitle number
 
 
 
-# convert_mp4_to_mp3("//Users/emmanuellandau/Documents/EditLab/TODO/a/audio.mp4", "//Users/emmanuellandau/Documents/EditLab/TODO/a/audio.mp3")
+# convert_mp4_to_mp3("//Users/emmanuellandau/Documents/EditLab/TODO/bazncamp/audio.mp4", "//Users/emmanuellandau/Documents/EditLab/TODO/bazncamp/audio.mp3")
