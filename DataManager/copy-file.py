@@ -93,20 +93,20 @@ def create_folders_concept(dossier_parent, phrases):
     # Créer un dossier et ajouter un fichier "description" pour chaque phrase
     for phrase in phrases:
         txt = ""
-        prompt = f"""realise moi un script dynamique, fluide et mystérieux ( un bloc, un seul paragraphe) de
-         350 mots avec suspens sur titre : {phrase}!  La première phrase est le titre pour impacter, Puis juste après,
-          dans la deuxième phrase tu dois  demander de mettre leur date de naissance en commentaire pour trouver leur
+        prompt = f"""realise moi un script dynamique, fluide et mystérieux ( un bloc, un seul paragraphe, plain text) de
+         280 mots avec suspens sur titre : Voici les {phrase}!  La première phrase est le titre pour impacter, Puis juste après tu dis Mais avant de tout te dévoiler ...,
+          dans la deuxième phrase tu dois  demander promptement de mettre leur date de naissance en commentaire pour trouver leur
            jumeau astrologique en commentaire (ici tu le tutoies). tu peux
-            parler au masculin neutre, tu dois avoir un ton chaleureux. Donne le ou les signes astro compatibles et argumentes. Note importante, s'il y a des chiffres dans
-             ta réponse, écrit les en lettres et évite les tirets longs. A la fin de la vidéo en une phrase, tu  demande
-              de commenter, partager et republier si j'ai vu juste. Attention ta réponse contient UNIQUEMENT le paragraphe sans
+            parler au masculin neutre, tu dois avoir un ton franc voire choquant. Puis tu réalise un développement franc et provocant, TU NE FAIS PAS DE CONCLUSION c'est mauvais pour la rétention, TU FINIS PAR TA DERNIERE IDEE BRUTALEMENT par le CTA : et si tu veux en savoir plus sur ton theme astral clique sur le lien dans ma bio, . Note importante, s'il y a des chiffres dans
+             ta réponse, écrit les en lettres et évite les tirets longs.  Attention ta réponse contient UNIQUEMENT le paragraphe sans
 texte introductif ou parasite."""
         dossier = os.path.join(dossier_parent, phrase)
         description_fichier = os.path.join(dossier, "description.txt")
-        #txt = get_descri(prompt)
+        txt = get_descri(prompt)
         os.mkdir(dossier)
         with open(description_fichier, "w") as file:
             file.write(txt)
+
 
     return print("tâche effectuée")
 
@@ -128,14 +128,21 @@ def lister_fichiers(dossier):
 
 # questions = [f"La plus grande force des {mbti_type}s" for mbti_type in mbti_types]
 
-titres_videos =  [
-    "Le problème du scorpion",
-    "Le problème du signe vierge",
-    "Les béliers sont différents",
-    "Si les signes étaient des anges",
-    "Si les signes étaient des démons",
-    "Il y a un signe astro qui"
-]
+titres_videos =  ['six chose a ne jamais faire devant un Bélier',
+                  'six chose a ne jamais faire devant un Taureau',
+                  'six chose a ne jamais faire devant un Gémeaux',
+                  'six chose a ne jamais faire devant un Cancer',
+                  'six chose a ne jamais faire devant un Lion',
+                  'six chose a ne jamais faire devant une Vierge',
+                  'six chose a ne jamais faire devant une Balance',
+                  'six chose a ne jamais faire devant un Scorpion',
+                  'six chose a ne jamais faire devant un Sagittaire',
+                  'six chose a ne jamais faire devant un Capricorne',
+                  'six chose a ne jamais faire devant un Verseau',
+                  'six chose a ne jamais faire devant un Poisson']
+
+
+
 
 
 

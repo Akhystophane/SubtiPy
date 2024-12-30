@@ -1,5 +1,7 @@
 import json
 import os
+import subprocess
+
 import whisper
 from moviepy.editor import *
 from pydub import AudioSegment
@@ -9,6 +11,27 @@ from elevenlabs import voices, generate, play
 key = "22329c3dd35a33d7cd8997d7cdaabacf"
 set_api_key(key)
 from mutagen.mp3 import MP3
+from pydub import AudioSegment
+
+
+
+def speedup_audio_ffmpeg(input_file, output_file, speed_percent):
+  # Calcul du facteur à partir du pourcentage
+  speed_factor = 1 + (speed_percent / 100.0)
+
+  # Si le facteur est hors de la plage 0.5-2.0, on peut enchaîner plusieurs appels
+  # Exemple : si on veut speed_percent=300% (soit facteur 4.0), on peut faire deux passages à 2.0
+  # Pour un simple exemple, supposons speed_percent entre -50% et +100% pour rester dans 0.5 et 2.0
+  subprocess.run([
+    "ffmpeg", "-y", "-i", input_file,
+    "-filter:a", f"atempo={speed_factor}",
+    "-vn", output_file
+  ], check=True)
+
+# input_mp3 = "/Users/emmanuellandau/Documents/EditLab/TODO/Ne trahis jamais la confiance d’un Scorpion/audio.mp3"
+# output_mp3 = "/Users/emmanuellandau/Documents/EditLab/TODO/Ne trahis jamais la confiance d’un Scorpion/output_audio.mp3"
+# speed_percent = 15  # Augmenter la vitesse de 20%
+# speedup_audio_ffmpeg(input_mp3, output_mp3, speed_percent)
 def check_mp3_size(chemin_fichier):
   # Obtenir les métadonnées du fichier MP3
   audio = MP3(chemin_fichier)
@@ -25,8 +48,11 @@ def make_voice(dossier_principal):
   # Parcours des sous-dossiers
   for dossier, sous_dossiers, fichiers in os.walk(dossier_principal):
     print(dossier)
+
     # Recherche du fichier "description.txt"
     if "description.txt" in fichiers:
+      folder = os.path.join(dossier)
+
       if not 'audio.mp3' in fichiers:
         male_radio = "1ns94GwK9YDCJoL6Nglv"
         male_origin = 'G7xH3hmwHsuqBz5TIhkC'
@@ -44,8 +70,12 @@ def make_voice(dossier_principal):
 
         # Construction du chemin du fichier audio
         chemin_audio = os.path.join(dossier, "audio.mp3")
-        save(audio, chemin_audio)
+        chemin_audio_temp = os.path.join(dossier, "audio_temp.mp3")
+        save(audio, chemin_audio_temp)
+        speedup_audio_ffmpeg(chemin_audio_temp, chemin_audio, 10)
+        os.remove(chemin_audio_temp)
         check_mp3_size(chemin_audio)
+        dump_srt(folder)
       else:
         print(dossier)
 
@@ -159,7 +189,7 @@ def process_videos_and_transcribe(input_folder, output_folder, model_size="large
 # folder = "/Users/emmanuellandau/Documents/EditLab/TODO/retranscription"
 # dump_srt(folder)
 # transcribe_audio()
-#make_voice(dossier_principal)
+make_voice(dossier_principal)
 # dump_                                                                                                                                                                                                                                       srt(folder)
 
 
