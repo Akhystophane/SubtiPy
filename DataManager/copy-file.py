@@ -102,7 +102,7 @@ def create_folders_concept(dossier_parent, phrases):
 texte introductif ou parasite."""
         dossier = os.path.join(dossier_parent, phrase)
         description_fichier = os.path.join(dossier, "description.txt")
-        txt = get_descri(prompt)
+        # txt = get_descri(prompt)
         os.mkdir(dossier)
         with open(description_fichier, "w") as file:
             file.write(txt)
@@ -128,18 +128,12 @@ def lister_fichiers(dossier):
 
 # questions = [f"La plus grande force des {mbti_type}s" for mbti_type in mbti_types]
 
-titres_videos =  ['six chose a ne jamais faire devant un Bélier',
-                  'six chose a ne jamais faire devant un Taureau',
-                  'six chose a ne jamais faire devant un Gémeaux',
-                  'six chose a ne jamais faire devant un Cancer',
-                  'six chose a ne jamais faire devant un Lion',
-                  'six chose a ne jamais faire devant une Vierge',
-                  'six chose a ne jamais faire devant une Balance',
-                  'six chose a ne jamais faire devant un Scorpion',
-                  'six chose a ne jamais faire devant un Sagittaire',
-                  'six chose a ne jamais faire devant un Capricorne',
-                  'six chose a ne jamais faire devant un Verseau',
-                  'six chose a ne jamais faire devant un Poisson']
+titres_videos =  ["Année 2025 pour les signes d'air",
+                  "Année 2025 pour les signes d'eau",
+                  "Année 2025 pour les signes de Terre",
+                  "Année 2025 pour les signes de feu",
+                  "Année 2025 pour les Capricornes"
+                  ]
 
 
 

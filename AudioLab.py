@@ -126,7 +126,7 @@ def dump_srt(folder, max_words=2):
   model = stable_whisper.load_model('large-v3')
   # result = model.align(audio_path, txt)
   # initial_prompt="signes astrologiques : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons"
-  result = model.transcribe(audio_path, fp16=False, prompt="bien orthographier: Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons, j'aime, like")
+  result = model.transcribe(audio_path, fp16=False, language="fr", prompt="bien orthographier: Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons, j'aime, like")
   print(result)
   result = (
       result
@@ -186,10 +186,10 @@ def process_videos_and_transcribe(input_folder, output_folder, model_size="large
 
 # process_videos_and_transcribe("/Users/emmanuellandau/Documents/EditLab/TODO/retranscription", "/Users/emmanuellandau/Documents/EditLab/TODO/retranscription")
 
-# folder = "/Users/emmanuellandau/Documents/EditLab/TODO/retranscription"
-# dump_srt(folder)
+folder = "/Users/emmanuellandau/Documents/EditLab/TODO/retranscription"
+dump_srt(folder)
 # transcribe_audio()
-make_voice(dossier_principal)
+# make_voice(dossier_principal)
 # dump_                                                                                                                                                                                                                                       srt(folder)
 
 

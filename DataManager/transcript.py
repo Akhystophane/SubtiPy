@@ -28,7 +28,7 @@ def extract_text_from_srt(srt_file_path, output_txt_path):
 
 # Example usage
 srt_file_path = '/Users/emmanuellandau/Documents/EditLab/TODO/retranscription/audio.srt'  # Replace with the path to your SRT file
-output_txt_path = '/Users/emmanuellandau/Documents/EditLab/TODO/retranscription/trasncript.txt'  # Replace with your desired output path
+output_txt_path = '/Users/emmanuellandau/Documents/EditLab/TODO/retranscription/transcript_english.txt'  # Replace with your desired output path
 
 # Note: This is an example. The paths need to be replaced with actual file paths.
 extract_text_from_srt(srt_file_path, output_txt_path)

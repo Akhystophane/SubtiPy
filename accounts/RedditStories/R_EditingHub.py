@@ -126,7 +126,7 @@ def get_done(Lab_path):
 # id = find_folder_id("TODO")
 # synchronize_subfolders("/Users/emmanuellandau/Documents/EditLab/READY", id)
 
-# get_done("/Users/emmanuellandau/Documents/EditLab")
+get_done("/Users/emmanuellandau/Documents/EditLab")
 #
 #
 
