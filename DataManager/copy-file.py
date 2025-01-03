@@ -128,29 +128,12 @@ def lister_fichiers(dossier):
 
 # questions = [f"La plus grande force des {mbti_type}s" for mbti_type in mbti_types]
 
-titres_videos =  ["Année 2025 pour les signes d'air",
-                  "Année 2025 pour les signes d'eau",
-                  "Année 2025 pour les signes de Terre",
-                  "Année 2025 pour les signes de feu",
-                  "Année 2025 pour les Capricornes"
-                  ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+titres_videos =  ['Comment Dieu à crée les Béliers', 'Comment Dieu à crée les Taureaux',
+                  'Comment Dieu à crée les Gémeaux', 'Comment Dieu à crée les Cancers',
+                  'Comment Dieu à crée les Lions', 'Comment Dieu à crée les Vierges',
+                  'Comment Dieu à crée les Balances', 'Comment Dieu à crée les Scorpions',
+                  'Comment Dieu à crée les Sagittaires', 'Comment Dieu à crée les Capricornes',
+                  'Comment Dieu à crée les Verseaux', 'Comment Dieu à crée les Poissons']
 
 
 
